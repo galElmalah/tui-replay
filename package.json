@@ -1,0 +1,61 @@
+{
+  "name": "tui-replay",
+  "version": "0.1.0",
+  "description": "Web and terminal replay viewer for @microsoft/tui-test traces.",
+  "keywords": [
+    "tui",
+    "terminal",
+    "replay",
+    "trace",
+    "tui-test"
+  ],
+  "homepage": "https://github.com/galElmalah/tui-replay#readme",
+  "bugs": {
+    "url": "https://github.com/galElmalah/tui-replay/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/galElmalah/tui-replay.git"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./sdk": {
+      "types": "./dist/sdk.d.ts",
+      "import": "./dist/sdk.js"
+    }
+  },
+  "bin": {
+    "tui-replay": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "docs/screenshots",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "npm run build && node --test \"dist/**/*.test.js\"",
+    "preview": "npm run build && node dist/cli.js preview",
+    "tui": "npm run build && node dist/cli.js tui"
+  },
+  "dependencies": {
+    "@opentui/core": "^0.2.15",
+    "@xterm/headless": "^6.0.0",
+    "commander": "^14.0.2",
+    "open": "^10.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}
