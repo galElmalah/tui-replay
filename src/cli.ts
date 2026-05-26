@@ -9,8 +9,8 @@ const program = new Command();
 
 program
   .name("tui-replay")
-  .description("Web replay viewer for @microsoft/tui-test traces.")
-  .version("0.1.0");
+  .description("Replay viewer for @microsoft/tui-test traces.")
+  .version("0.2.0");
 
 program
   .command("preview")
@@ -44,6 +44,64 @@ program
   });
 
 program
+  .command("gif")
+  .description("export the terminal replay surface to an animated GIF")
+  .argument("<trace>", "trace file or directory")
+  .option("-o, --output <file>", "output GIF path")
+  .option("--trace-index <index>", "trace index to export when the input resolves to multiple traces", parseNonNegativeInteger, 0)
+  .option("--speed <rate>", "playback speed multiplier", parsePositiveNumber, 1)
+  .option("--repeat <count>", "GIF repeat count: 0 forever, -1 once, or a positive repeat count", parseRepeatCount, 0)
+  .option("--min-delay <ms>", "minimum frame delay", parsePositiveNumber, 20)
+  .option("--last-delay <ms>", "delay for the final frame", parsePositiveNumber, 1000)
+  .option("--scale <scale>", "output scale multiplier", parsePositiveNumber, 1)
+  .option("--font-size <px>", "terminal font size before scale", parsePositiveNumber, 14)
+  .option("--cell-width <px>", "terminal cell width before scale", parsePositiveNumber)
+  .option("--line-height <px>", "terminal line height before scale", parsePositiveNumber)
+  .option("--padding <px>", "terminal padding before scale", parseNonNegativeNumber)
+  .option("--font-family <family>", "terminal font family", "Menlo, Monaco, Consolas, monospace")
+  .action(
+    async (
+      input: string,
+      options: {
+        output?: string;
+        traceIndex: number;
+        speed: number;
+        repeat: number;
+        minDelay: number;
+        lastDelay: number;
+        scale: number;
+        fontSize: number;
+        cellWidth?: number;
+        lineHeight?: number;
+        padding?: number;
+        fontFamily: string;
+      }
+    ) => {
+      const { exportTerminalGif } = await import("./gif/export.js");
+      const result = await exportTerminalGif({
+        input,
+        output: options.output,
+        traceIndex: options.traceIndex,
+        speed: options.speed,
+        repeat: options.repeat,
+        minDelayMs: options.minDelay,
+        lastDelayMs: options.lastDelay,
+        scale: options.scale,
+        fontSize: options.fontSize,
+        cellWidth: options.cellWidth,
+        lineHeight: options.lineHeight,
+        padding: options.padding,
+        fontFamily: options.fontFamily
+      });
+
+      process.stdout.write(`Wrote ${result.outputPath}\n`);
+      process.stdout.write(
+        `Trace: ${result.tracePath}\nFrames: ${result.frameCount} | Duration: ${formatDuration(result.durationMs)} | Size: ${result.width}x${result.height}\n`
+      );
+    }
+  );
+
+program
   .command("tui")
   .description("replay tui-test traces inside a terminal UI powered by OpenTUI")
   .argument("<trace...>", "trace file or directory")
@@ -72,6 +130,45 @@ function parsePort(value: string): number {
     throw new Error(`Invalid port: ${value}`);
   }
   return parsed;
+}
+
+function parseNonNegativeInteger(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`Invalid non-negative integer: ${value}`);
+  }
+  return parsed;
+}
+
+function parsePositiveNumber(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`Invalid positive number: ${value}`);
+  }
+  return parsed;
+}
+
+function parseNonNegativeNumber(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`Invalid non-negative number: ${value}`);
+  }
+  return parsed;
+}
+
+function parseRepeatCount(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < -1) {
+    throw new Error(`Invalid repeat count: ${value}`);
+  }
+  return parsed;
+}
+
+function formatDuration(durationMs: number): string {
+  if (durationMs < 1000) {
+    return `${durationMs}ms`;
+  }
+  return `${(durationMs / 1000).toFixed(2)}s`;
 }
 
 function isBunRuntime(): boolean {

@@ -2,7 +2,7 @@
 
 View and replay [`@microsoft/tui-test`](https://github.com/microsoft/tui-test) traces from either a browser or a terminal UI.
 
-TUI Replay is a TypeScript CLI package that reads `tui-test` trace files, reconstructs terminal frames with `@xterm/headless`, and exposes the same replay model to a clean web viewer and an OpenTUI-powered terminal viewer. The viewers are read-only: they render what the test emitted, with replay controls, frame previews, timing, source assertions, and optional trace annotations.
+TUI Replay is a TypeScript CLI package that reads `tui-test` trace files, reconstructs terminal frames with `@xterm/headless`, and exposes the same replay model to a clean web viewer, an OpenTUI-powered terminal viewer, and terminal-only GIF exports. The viewers are read-only: they render what the test emitted, with replay controls, frame previews, timing, source assertions, and optional trace annotations.
 
 ## Screenshots
 
@@ -21,6 +21,7 @@ TUI Replay is a TypeScript CLI package that reads `tui-test` trace files, recons
 - Show a smooth timeline with frame switch notches and horizontally scrollable frame previews.
 - Render frames with terminal cell colors and cursor state through `@xterm/headless`.
 - Watch trace files and directories so newly written test traces appear without restarting the server.
+- Export an animated GIF of the terminal surface only, without the surrounding viewer controls.
 - Show source context from the test file, including nearby `assert`, `expect`, and snapshot calls when available.
 - Add sidecar annotations for events such as OAuth, user actions, policy decisions, or checkpoints.
 - Use one shared data layer for the web UI and the TUI so both viewers load the same traces the same way.
@@ -36,6 +37,7 @@ During local development, run the CLI directly from `dist` after building:
 
 ```bash
 node dist/cli.js preview examples/simple.tui-trace.json
+node dist/cli.js gif examples/simple.tui-trace.json --output simple.gif
 node dist/cli.js tui examples/simple.tui-trace.json
 ```
 
@@ -43,6 +45,7 @@ After package installation, use the `tui-replay` binary:
 
 ```bash
 tui-replay preview ./tui-traces
+tui-replay gif ./tui-traces/my-test-trace --output my-test.gif
 tui-replay tui ./tui-traces
 ```
 
@@ -68,6 +71,34 @@ tui-replay preview <trace...> \
 The `--project` option points at the source tree that produced the traces. TUI Replay uses it to resolve test files from the trace metadata and show related source assertions in the details panel.
 
 The web viewer watches inputs by default. For directories, it detects new trace files. For files, it reloads when the trace or its annotation sidecar changes. `@microsoft/tui-test` writes trace data when the test framework flushes the trace file; TUI Replay updates as soon as that file appears or changes.
+
+## GIF Export
+
+Export an animated GIF of the terminal display itself:
+
+```bash
+tui-replay gif .tui-test/cache/tui-traces/my-test-trace --output my-test.gif
+```
+
+If the input resolves to multiple traces, use `--trace-index` to choose one:
+
+```bash
+tui-replay gif .tui-test/cache/tui-traces --trace-index 3 --output trace-3.gif
+```
+
+Useful options:
+
+```bash
+tui-replay gif <trace> \
+  --output trace.gif \
+  --speed 2 \
+  --scale 0.75 \
+  --font-size 14 \
+  --min-delay 20 \
+  --last-delay 1000
+```
+
+The GIF exporter renders only the terminal grid. It uses the same headless frame reconstruction as the web and TUI viewers, then rasterizes those frames for GIF encoding.
 
 ## Terminal UI
 
@@ -150,6 +181,19 @@ const model = await dataSource.load();
 
 The returned `PreviewModel` contains trace summaries, rendered frames, resolved annotations, and source details. The browser server serializes this model to the client, while the OpenTUI viewer renders it directly.
 
+You can also export GIFs programmatically:
+
+```ts
+import { exportTerminalGif } from "tui-replay/gif";
+
+await exportTerminalGif({
+  input: "./.tui-test/cache/tui-traces/my-test-trace",
+  output: "./my-test.gif",
+  speed: 2,
+  scale: 0.75
+});
+```
+
 ## Trace Support
 
 TUI Replay accepts:
@@ -173,6 +217,7 @@ Common commands:
 ```bash
 npm run build
 npm run preview -- examples/simple.tui-trace.json --project .
+npm run gif -- examples/simple.tui-trace.json --output simple.gif
 npm run tui -- examples/simple.tui-trace.json --project .
 ```
 
@@ -184,6 +229,7 @@ Project layout:
 | `src/server` | HTTP server, static HTML, live reload events |
 | `src/viewer` | Browser-side replay UI |
 | `src/tui` | OpenTUI replay UI |
+| `src/gif` | Terminal GIF export |
 | `src/preview` | Shared replay data source and selectors |
 | `src/trace` | Trace loading, rendering, annotations, and types |
 | `src/source` | Best-effort source expectation extraction |
