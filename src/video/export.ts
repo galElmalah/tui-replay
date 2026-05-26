@@ -20,6 +20,23 @@ export const DEFAULT_TERMINAL_VIDEO_FPS = 60;
 export const DEFAULT_TERMINAL_VIDEO_SCALE = 2;
 export const DEFAULT_TERMINAL_VIDEO_MP4_CRF = 16;
 export const DEFAULT_TERMINAL_VIDEO_WEBM_CRF = 28;
+export const FFMPEG_NOT_FOUND_CODE = "TUI_REPLAY_FFMPEG_NOT_FOUND";
+
+type FfmpegCandidate = {
+  source: string;
+  value: string;
+};
+
+export class FfmpegResolutionError extends Error {
+  readonly code = FFMPEG_NOT_FOUND_CODE;
+  readonly attempts: string[];
+
+  constructor(message: string, attempts: string[]) {
+    super(message);
+    this.name = "FfmpegResolutionError";
+    this.attempts = attempts;
+  }
+}
 
 export type ExportTerminalVideoOptions = TerminalRenderOptions & {
   output?: string;
@@ -82,15 +99,31 @@ export async function exportTerminalVideo(options: ExportTerminalVideoOptions): 
   };
 }
 
-export async function resolveFfmpegPath(explicitPath?: string): Promise<string> {
-  const configuredPath = explicitPath || process.env.TUI_REPLAY_FFMPEG || process.env.FFMPEG_PATH || process.env.FFMPEG_BIN;
-  if (configuredPath) {
-    await assertExecutable(configuredPath);
-    return configuredPath;
+export async function resolveFfmpegPath(explicitPath?: string, env: NodeJS.ProcessEnv = process.env): Promise<string> {
+  const configuredCandidate = firstConfiguredFfmpegCandidate(explicitPath, env);
+  if (configuredCandidate) {
+    try {
+      await assertExecutable(configuredCandidate.value);
+      return configuredCandidate.value;
+    } catch (error) {
+      throw new FfmpegResolutionError(
+        formatConfiguredFfmpegError(configuredCandidate, error),
+        [`${configuredCandidate.source}: ${configuredCandidate.value}`]
+      );
+    }
   }
 
   const binaryName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
-  for (const dir of (process.env.PATH ?? "").split(path.delimiter)) {
+  const pathEntries = (env.PATH ?? "").split(path.delimiter).filter(Boolean);
+  const attempts = [
+    "--ffmpeg-path: not provided",
+    "TUI_REPLAY_FFMPEG: not set",
+    "FFMPEG_PATH: not set",
+    "FFMPEG_BIN: not set",
+    ...pathEntries.map((dir) => path.join(dir, binaryName))
+  ];
+
+  for (const dir of pathEntries) {
     if (!dir) {
       continue;
     }
@@ -104,7 +137,7 @@ export async function resolveFfmpegPath(explicitPath?: string): Promise<string> 
     }
   }
 
-  throw new Error("Unable to find ffmpeg. Install ffmpeg, set TUI_REPLAY_FFMPEG, or pass --ffmpeg-path.");
+  throw new FfmpegResolutionError(formatMissingFfmpegError(binaryName, pathEntries), attempts);
 }
 
 async function writeVideoFrames(
@@ -175,6 +208,87 @@ function runFfmpeg(ffmpegPath: string, args: string[]): Promise<void> {
 
 async function assertExecutable(filePath: string): Promise<void> {
   await access(filePath, 1);
+}
+
+function firstConfiguredFfmpegCandidate(explicitPath: string | undefined, env: NodeJS.ProcessEnv): FfmpegCandidate | undefined {
+  if (explicitPath) {
+    return { source: "--ffmpeg-path", value: explicitPath };
+  }
+
+  if (env.TUI_REPLAY_FFMPEG) {
+    return { source: "TUI_REPLAY_FFMPEG", value: env.TUI_REPLAY_FFMPEG };
+  }
+
+  if (env.FFMPEG_PATH) {
+    return { source: "FFMPEG_PATH", value: env.FFMPEG_PATH };
+  }
+
+  if (env.FFMPEG_BIN) {
+    return { source: "FFMPEG_BIN", value: env.FFMPEG_BIN };
+  }
+
+  return undefined;
+}
+
+function formatConfiguredFfmpegError(candidate: FfmpegCandidate, error: unknown): string {
+  return [
+    `Unable to use ffmpeg for TUI Replay video export. Error code: ${FFMPEG_NOT_FOUND_CODE}.`,
+    "",
+    "The configured ffmpeg binary does not exist or is not executable.",
+    `Checked ${candidate.source}: ${candidate.value}`,
+    `Failure: ${formatErrorReason(error)}`,
+    "",
+    formatFfmpegFixBlock()
+  ].join("\n");
+}
+
+function formatMissingFfmpegError(binaryName: string, pathEntries: string[]): string {
+  return [
+    `Unable to find ffmpeg for TUI Replay video export. Error code: ${FFMPEG_NOT_FOUND_CODE}.`,
+    "",
+    "Checked:",
+    "- --ffmpeg-path: not provided",
+    "- TUI_REPLAY_FFMPEG: not set",
+    "- FFMPEG_PATH: not set",
+    "- FFMPEG_BIN: not set",
+    `- PATH entries for ${binaryName}: ${formatPathEntries(pathEntries)}`,
+    "",
+    formatFfmpegFixBlock()
+  ].join("\n");
+}
+
+function formatFfmpegFixBlock(): string {
+  return [
+    "How to fix:",
+    "- Install ffmpeg and rerun the same command.",
+    "- macOS: brew install ffmpeg",
+    "- Ubuntu/Debian: sudo apt-get install ffmpeg",
+    "- Or pass --ffmpeg-path /absolute/path/to/ffmpeg",
+    "- Or set TUI_REPLAY_FFMPEG=/absolute/path/to/ffmpeg",
+    "- Also supported: FFMPEG_PATH or FFMPEG_BIN",
+    "- If video is not required, use `tui-replay gif ...`; GIF export does not require ffmpeg.",
+    "",
+    "Agent hint: treat TUI_REPLAY_FFMPEG_NOT_FOUND as a missing system dependency. Install ffmpeg or retry with --ffmpeg-path."
+  ].join("\n");
+}
+
+function formatPathEntries(pathEntries: string[]): string {
+  if (pathEntries.length === 0) {
+    return "(empty PATH)";
+  }
+
+  const maxEntries = 12;
+  const visibleEntries = pathEntries.slice(0, maxEntries).join(path.delimiter);
+  const remaining = pathEntries.length - maxEntries;
+  return remaining > 0 ? `${visibleEntries}${path.delimiter}... (${remaining} more)` : visibleEntries;
+}
+
+function formatErrorReason(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return String(error);
 }
 
 function resolveVideoFormat(outputPath: string | undefined, explicitFormat: TerminalVideoFormat | undefined): TerminalVideoFormat {

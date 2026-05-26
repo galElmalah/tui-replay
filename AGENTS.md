@@ -21,6 +21,7 @@ npm run video -- examples/simple.tui-trace.json --output /tmp/tui-replay.mp4 --o
 ```
 
 The video command requires `ffmpeg` on `PATH`, `TUI_REPLAY_FFMPEG`, `FFMPEG_PATH`, `FFMPEG_BIN`, or `--ffmpeg-path`.
+If video export fails with `TUI_REPLAY_FFMPEG_NOT_FOUND`, treat it as a missing system dependency. Install `ffmpeg`, set one of those environment variables, or retry with `--ffmpeg-path`. GIF export does not require `ffmpeg`.
 
 ## CLI Modes
 

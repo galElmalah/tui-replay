@@ -185,6 +185,8 @@ Exports MP4 or WebM video of the terminal display. The video exporter uses `ffmp
 
 Video quality is mostly controlled by output resolution. TUI Replay renders video at `--scale 2` by default so text stays crisp when previewed inline or embedded in docs. Increase `--scale`, `--font-size`, or lower `--crf` for sharper output; lower `--scale` or raise `--crf` for smaller files.
 
+If `ffmpeg` cannot be resolved, the CLI exits with an actionable `TUI_REPLAY_FFMPEG_NOT_FOUND` message. That message lists the checked configuration paths and includes install or retry options for humans and automation.
+
 | Flag | Default | Description |
 | --- | --- | --- |
 | `-o, --output <file>` | `<trace-name>.mp4` or selected format | Output video path. |
@@ -231,6 +233,17 @@ tui-replay video .tui-test/cache/tui-traces/my-test-trace \
   --fps 60 \
   --crf 14 \
   --overlay
+```
+
+Missing `ffmpeg` remediation examples:
+
+```bash
+brew install ffmpeg
+tui-replay video .tui-test/cache/tui-traces/my-test-trace --output my-test.mp4
+
+tui-replay video .tui-test/cache/tui-traces/my-test-trace \
+  --output my-test.mp4 \
+  --ffmpeg-path /absolute/path/to/ffmpeg
 ```
 
 ## Annotation SDK

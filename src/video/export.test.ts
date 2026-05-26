@@ -3,7 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { exportTerminalVideo, resolveFfmpegPath } from "./export.js";
+import { FFMPEG_NOT_FOUND_CODE, exportTerminalVideo, resolveFfmpegPath } from "./export.js";
 import type { TuiTrace } from "../trace/types.js";
 
 const ffmpegAvailable = await hasFfmpeg();
@@ -40,6 +40,39 @@ test("exports terminal frames as an mp4 video", { skip: !ffmpegAvailable }, asyn
   }
 });
 
+test("reports actionable guidance when ffmpeg is not on PATH", async () => {
+  await assert.rejects(
+    () => resolveFfmpegPath(undefined, { PATH: "" }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.equal((error as { code?: string }).code, FFMPEG_NOT_FOUND_CODE);
+      assert.match(error.message, /Unable to find ffmpeg/);
+      assert.match(error.message, /--ffmpeg-path/);
+      assert.match(error.message, /TUI_REPLAY_FFMPEG/);
+      assert.match(error.message, /brew install ffmpeg/);
+      assert.match(error.message, /Agent hint/);
+      return true;
+    }
+  );
+});
+
+test("reports the configured ffmpeg path that failed", async () => {
+  const missingPath = path.join(os.tmpdir(), "tui-replay-missing-ffmpeg");
+
+  await assert.rejects(
+    () => resolveFfmpegPath(missingPath, { PATH: "" }),
+    (error: unknown) => {
+      assert.ok(error instanceof Error);
+      assert.equal((error as { code?: string }).code, FFMPEG_NOT_FOUND_CODE);
+      assert.match(error.message, /configured ffmpeg binary/);
+      assert.match(error.message, /--ffmpeg-path/);
+      assert.match(error.message, new RegExp(escapeRegExp(missingPath)));
+      assert.match(error.message, /Agent hint/);
+      return true;
+    }
+  );
+});
+
 async function hasFfmpeg(): Promise<boolean> {
   try {
     await resolveFfmpegPath();
@@ -59,4 +92,8 @@ function sampleTrace(): TuiTrace {
     ],
     testName: ["video export"]
   };
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
