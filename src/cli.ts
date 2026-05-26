@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { startPreviewServer } from "./server/preview-server.js";
 import type { TerminalOverlayPosition } from "./media/terminal-render.js";
-import type { TerminalVideoFormat } from "./video/export.js";
+import { DEFAULT_TERMINAL_VIDEO_FPS, DEFAULT_TERMINAL_VIDEO_SCALE, type TerminalVideoFormat } from "./video/export.js";
 
 const program = new Command();
 
@@ -125,12 +125,12 @@ program
   .option("-o, --output <file>", "output video path")
   .option("--format <format>", "video format: mp4 or webm", parseVideoFormat)
   .option("--ffmpeg-path <file>", "path to ffmpeg binary")
-  .option("--fps <rate>", "output video frame rate", parsePositiveNumber, 50)
+  .option("--fps <rate>", "output video frame rate", parsePositiveNumber, DEFAULT_TERMINAL_VIDEO_FPS)
   .option("--trace-index <index>", "trace index to export when the input resolves to multiple traces", parseNonNegativeInteger, 0)
   .option("--speed <rate>", "playback speed multiplier", parsePositiveNumber, 1)
   .option("--min-delay <ms>", "minimum frame delay", parsePositiveNumber, 20)
   .option("--last-delay <ms>", "delay for the final frame", parsePositiveNumber, 1000)
-  .option("--scale <scale>", "output scale multiplier", parsePositiveNumber, 1)
+  .option("--scale <scale>", "output scale multiplier", parsePositiveNumber, DEFAULT_TERMINAL_VIDEO_SCALE)
   .option("--font-size <px>", "terminal font size before scale", parsePositiveNumber, 14)
   .option("--cell-width <px>", "terminal cell width before scale", parsePositiveNumber)
   .option("--line-height <px>", "terminal line height before scale", parsePositiveNumber)

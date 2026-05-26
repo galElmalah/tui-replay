@@ -183,17 +183,19 @@ tui-replay video <trace> [options]
 
 Exports MP4 or WebM video of the terminal display. The video exporter uses `ffmpeg`; install `ffmpeg` on your `PATH`, set `TUI_REPLAY_FFMPEG`, set `FFMPEG_PATH`, set `FFMPEG_BIN`, or pass `--ffmpeg-path`.
 
+Video quality is mostly controlled by output resolution. TUI Replay renders video at `--scale 2` by default so text stays crisp when previewed inline or embedded in docs. Increase `--scale`, `--font-size`, or lower `--crf` for sharper output; lower `--scale` or raise `--crf` for smaller files.
+
 | Flag | Default | Description |
 | --- | --- | --- |
 | `-o, --output <file>` | `<trace-name>.mp4` or selected format | Output video path. |
 | `--format <format>` | Inferred from output extension, otherwise `mp4` | Video format: `mp4` or `webm`. |
 | `--ffmpeg-path <file>` | Auto-detected | Path to an `ffmpeg` binary. |
-| `--fps <rate>` | `50` | Output video frame rate. Higher values produce smoother timing with more duplicated frames. |
+| `--fps <rate>` | `60` | Output video frame rate. Higher values produce smoother timing with more duplicated frames. |
 | `--trace-index <index>` | `0` | Trace index to export when the input resolves to multiple traces. |
 | `--speed <rate>` | `1` | Playback speed multiplier. |
 | `--min-delay <ms>` | `20` | Minimum frame delay before frame duplication. |
 | `--last-delay <ms>` | `1000` | Delay for the final frame. |
-| `--scale <scale>` | `1` | Output scale multiplier. |
+| `--scale <scale>` | `2` | Output scale multiplier. |
 | `--font-size <px>` | `14` | Terminal font size before scale. |
 | `--cell-width <px>` | Derived from font size | Terminal cell width before scale. |
 | `--line-height <px>` | Derived from font size | Terminal line height before scale. |
@@ -203,7 +205,7 @@ Exports MP4 or WebM video of the terminal display. The video exporter uses `ffmp
 | `--overlay-position <position>` | `bottom-right` | Overlay position: `top-left`, `top-right`, `bottom-left`, or `bottom-right`. |
 | `--overlay-background <color>` | `#05080c` | Overlay background color. |
 | `--overlay-foreground <color>` | `#f8fafc` | Overlay text color. |
-| `--crf <value>` | `18` for MP4, `32` for WebM | Encoder quality value. Lower usually means higher quality and larger files. |
+| `--crf <value>` | `16` for MP4, `28` for WebM | Encoder quality value. Lower usually means higher quality and larger files. |
 | `--preset <preset>` | `medium` | ffmpeg encoder preset for MP4 output. |
 | `-h, --help` | | Show command help. |
 
@@ -218,6 +220,17 @@ tui-replay video .tui-test/cache/tui-traces/my-test-trace \
 tui-replay video .tui-test/cache/tui-traces/my-test-trace \
   --output my-test.webm \
   --format webm
+```
+
+High quality sharing example:
+
+```bash
+tui-replay video .tui-test/cache/tui-traces/my-test-trace \
+  --output my-test-hq.mp4 \
+  --scale 3 \
+  --fps 60 \
+  --crf 14 \
+  --overlay
 ```
 
 ## Annotation SDK

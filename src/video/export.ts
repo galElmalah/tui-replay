@@ -16,6 +16,11 @@ export type TerminalVideoOverlayPosition = TerminalOverlayPosition;
 export type TerminalVideoOverlayOptions = TerminalOverlayOptions;
 export type TerminalVideoFormat = "mp4" | "webm";
 
+export const DEFAULT_TERMINAL_VIDEO_FPS = 60;
+export const DEFAULT_TERMINAL_VIDEO_SCALE = 2;
+export const DEFAULT_TERMINAL_VIDEO_MP4_CRF = 16;
+export const DEFAULT_TERMINAL_VIDEO_WEBM_CRF = 28;
+
 export type ExportTerminalVideoOptions = TerminalRenderOptions & {
   output?: string;
   format?: TerminalVideoFormat;
@@ -37,14 +42,18 @@ export type ExportTerminalVideoResult = {
 
 export async function exportTerminalVideo(options: ExportTerminalVideoOptions): Promise<ExportTerminalVideoResult> {
   const format = resolveVideoFormat(options.output, options.format);
-  const source = await loadTerminalRenderSource(options, { evenDimensions: true });
+  const renderOptions = {
+    ...options,
+    scale: options.scale ?? DEFAULT_TERMINAL_VIDEO_SCALE
+  };
+  const source = await loadTerminalRenderSource(renderOptions, { evenDimensions: true });
   const outputPath = path.resolve(options.output ?? defaultTerminalOutputPath(source.tracePath, format));
   const ffmpegPath = await resolveFfmpegPath(options.ffmpegPath);
   const tempDir = await mkdtemp(path.join(os.tmpdir(), "tui-replay-video-"));
 
   try {
-    const frameRate = options.fps ?? 50;
-    const framePattern = await writeVideoFrames(tempDir, source.frames, source.metrics, options, frameRate);
+    const frameRate = options.fps ?? DEFAULT_TERMINAL_VIDEO_FPS;
+    const framePattern = await writeVideoFrames(tempDir, source.frames, source.metrics, renderOptions, frameRate);
     await mkdir(path.dirname(outputPath), { recursive: true });
     await runFfmpeg(ffmpegPath, [
       "-hide_banner",
@@ -122,7 +131,7 @@ async function writeVideoFrames(
 
 function videoCodecArgs(format: TerminalVideoFormat, options: ExportTerminalVideoOptions): string[] {
   if (format === "webm") {
-    return ["-an", "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", String(options.crf ?? 32), "-pix_fmt", "yuv420p"];
+    return ["-an", "-c:v", "libvpx-vp9", "-b:v", "0", "-crf", String(options.crf ?? DEFAULT_TERMINAL_VIDEO_WEBM_CRF), "-pix_fmt", "yuv420p"];
   }
 
   return [
@@ -132,7 +141,7 @@ function videoCodecArgs(format: TerminalVideoFormat, options: ExportTerminalVide
     "-preset",
     options.preset ?? "medium",
     "-crf",
-    String(options.crf ?? 18),
+    String(options.crf ?? DEFAULT_TERMINAL_VIDEO_MP4_CRF),
     "-pix_fmt",
     "yuv420p",
     "-movflags",
