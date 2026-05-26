@@ -94,11 +94,13 @@ tui-replay gif <trace> \
   --speed 2 \
   --scale 0.75 \
   --font-size 14 \
+  --overlay \
+  --overlay-position bottom-right \
   --min-delay 20 \
   --last-delay 1000
 ```
 
-The GIF exporter renders only the terminal grid. It uses the same headless frame reconstruction as the web and TUI viewers, then rasterizes those frames for GIF encoding.
+The GIF exporter renders only the terminal grid. It uses the same headless frame reconstruction as the web and TUI viewers, then rasterizes those frames for GIF encoding. Use `--overlay` to add a small metadata layer with `Frame x / y` and the current replay timestamp.
 
 ## Terminal UI
 
@@ -190,7 +192,10 @@ await exportTerminalGif({
   input: "./.tui-test/cache/tui-traces/my-test-trace",
   output: "./my-test.gif",
   speed: 2,
-  scale: 0.75
+  scale: 0.75,
+  overlay: {
+    position: "bottom-right"
+  }
 });
 ```
 

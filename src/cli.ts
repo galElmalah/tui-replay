@@ -4,6 +4,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import { startPreviewServer } from "./server/preview-server.js";
+import type { TerminalGifOverlayPosition } from "./gif/export.js";
 
 const program = new Command();
 
@@ -59,6 +60,10 @@ program
   .option("--line-height <px>", "terminal line height before scale", parsePositiveNumber)
   .option("--padding <px>", "terminal padding before scale", parseNonNegativeNumber)
   .option("--font-family <family>", "terminal font family", "Menlo, Monaco, Consolas, monospace")
+  .option("--overlay", "draw frame and timestamp metadata over the exported terminal GIF")
+  .option("--overlay-position <position>", "overlay position: top-left, top-right, bottom-left, or bottom-right", parseOverlayPosition, "bottom-right")
+  .option("--overlay-background <color>", "overlay background color", "#05080c")
+  .option("--overlay-foreground <color>", "overlay foreground color", "#f8fafc")
   .action(
     async (
       input: string,
@@ -75,6 +80,10 @@ program
         lineHeight?: number;
         padding?: number;
         fontFamily: string;
+        overlay?: boolean;
+        overlayPosition: TerminalGifOverlayPosition;
+        overlayBackground: string;
+        overlayForeground: string;
       }
     ) => {
       const { exportTerminalGif } = await import("./gif/export.js");
@@ -91,7 +100,14 @@ program
         cellWidth: options.cellWidth,
         lineHeight: options.lineHeight,
         padding: options.padding,
-        fontFamily: options.fontFamily
+        fontFamily: options.fontFamily,
+        overlay: options.overlay
+          ? {
+              position: options.overlayPosition,
+              background: options.overlayBackground,
+              foreground: options.overlayForeground
+            }
+          : false
       });
 
       process.stdout.write(`Wrote ${result.outputPath}\n`);
@@ -162,6 +178,13 @@ function parseRepeatCount(value: string): number {
     throw new Error(`Invalid repeat count: ${value}`);
   }
   return parsed;
+}
+
+function parseOverlayPosition(value: string): TerminalGifOverlayPosition {
+  if (value === "top-left" || value === "top-right" || value === "bottom-left" || value === "bottom-right") {
+    return value;
+  }
+  throw new Error(`Invalid overlay position: ${value}`);
 }
 
 function formatDuration(durationMs: number): string {

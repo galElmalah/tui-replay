@@ -10,6 +10,17 @@ const DEFAULT_BACKGROUND = "#101318";
 const DEFAULT_FOREGROUND = "#e4e7eb";
 const DEFAULT_CURSOR = "#f8fafc";
 const DEFAULT_FONT_FAMILY = "Menlo, Monaco, Consolas, monospace";
+const DEFAULT_OVERLAY_BACKGROUND = "#05080c";
+const DEFAULT_OVERLAY_FOREGROUND = "#f8fafc";
+
+export type TerminalGifOverlayPosition = "top-left" | "top-right" | "bottom-left" | "bottom-right";
+
+export type TerminalGifOverlayOptions = {
+  enabled?: boolean;
+  position?: TerminalGifOverlayPosition;
+  background?: string;
+  foreground?: string;
+};
 
 export type ExportTerminalGifOptions = {
   input: string | string[];
@@ -28,6 +39,7 @@ export type ExportTerminalGifOptions = {
   background?: string;
   foreground?: string;
   cursorColor?: string;
+  overlay?: boolean | TerminalGifOverlayOptions;
 };
 
 export type ExportTerminalGifResult = {
@@ -48,6 +60,7 @@ type TerminalGifTheme = {
 type TerminalGifMetrics = {
   rows: number;
   cols: number;
+  frameCount: number;
   width: number;
   height: number;
   fontSize: number;
@@ -56,6 +69,14 @@ type TerminalGifMetrics = {
   padding: number;
   fontFamily: string;
   theme: TerminalGifTheme;
+  overlay: ResolvedTerminalGifOverlay;
+};
+
+type ResolvedTerminalGifOverlay = {
+  enabled: boolean;
+  position: TerminalGifOverlayPosition;
+  background: string;
+  foreground: string;
 };
 
 export async function exportTerminalGif(options: ExportTerminalGifOptions): Promise<ExportTerminalGifResult> {
@@ -168,8 +189,33 @@ function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalGifMetrics): 
     }
   }
 
+  if (metrics.overlay.enabled) {
+    parts.push(renderOverlay(frame, metrics));
+  }
+
   parts.push("</svg>");
   return parts.join("");
+}
+
+function renderOverlay(frame: RenderedFrame, metrics: TerminalGifMetrics): string {
+  const label = `Frame ${frame.index + 1} / ${metrics.frameCount} | ${formatTimestamp(frame.time)}`;
+  const fontSize = Math.max(7, metrics.fontSize * 0.78);
+  const paddingX = Math.max(5, metrics.fontSize * 0.45);
+  const paddingY = Math.max(3, metrics.fontSize * 0.28);
+  const margin = Math.max(4, metrics.padding * 0.45);
+  const width = Math.min(metrics.width - margin * 2, label.length * fontSize * 0.62 + paddingX * 2);
+  const height = fontSize + paddingY * 2;
+  const x = metrics.overlay.position.endsWith("right") ? metrics.width - margin - width : margin;
+  const y = metrics.overlay.position.startsWith("bottom") ? metrics.height - margin - height : margin;
+  const textX = x + paddingX;
+  const textY = y + paddingY + fontSize * 0.82;
+
+  return [
+    `<g aria-label="${escapeAttribute(label)}">`,
+    `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(width)}" height="${formatNumber(height)}" rx="${formatNumber(Math.max(4, height / 3))}" fill="${escapeAttribute(metrics.overlay.background)}" opacity="0.82"/>`,
+    `<text x="${formatNumber(textX)}" y="${formatNumber(textY)}" xml:space="preserve" fill="${escapeAttribute(metrics.overlay.foreground)}" font-family="${escapeAttribute(metrics.fontFamily)}" font-size="${formatNumber(fontSize)}" font-weight="700">${escapeText(label)}</text>`,
+    "</g>"
+  ].join("");
 }
 
 function createMetrics(frames: RenderedFrame[], options: ExportTerminalGifOptions): TerminalGifMetrics {
@@ -196,7 +242,36 @@ function createMetrics(frames: RenderedFrame[], options: ExportTerminalGifOption
       background: options.background ?? DEFAULT_BACKGROUND,
       foreground: options.foreground ?? DEFAULT_FOREGROUND,
       cursorColor: options.cursorColor ?? DEFAULT_CURSOR
-    }
+    },
+    overlay: resolveOverlay(options.overlay),
+    frameCount: frames.length
+  };
+}
+
+function resolveOverlay(overlay: ExportTerminalGifOptions["overlay"]): ResolvedTerminalGifOverlay {
+  if (overlay === true) {
+    return {
+      enabled: true,
+      position: "bottom-right",
+      background: DEFAULT_OVERLAY_BACKGROUND,
+      foreground: DEFAULT_OVERLAY_FOREGROUND
+    };
+  }
+
+  if (!overlay) {
+    return {
+      enabled: false,
+      position: "bottom-right",
+      background: DEFAULT_OVERLAY_BACKGROUND,
+      foreground: DEFAULT_OVERLAY_FOREGROUND
+    };
+  }
+
+  return {
+    enabled: overlay.enabled ?? true,
+    position: overlay.position ?? "bottom-right",
+    background: overlay.background ?? DEFAULT_OVERLAY_BACKGROUND,
+    foreground: overlay.foreground ?? DEFAULT_OVERLAY_FOREGROUND
   };
 }
 
@@ -214,6 +289,13 @@ function frameDelay(frames: RenderedFrame[], index: number, options: ExportTermi
 function defaultOutputPath(tracePath: string): string {
   const parsed = path.parse(tracePath);
   return `${parsed.name || parsed.base}.gif`;
+}
+
+function formatTimestamp(timeMs: number): string {
+  if (timeMs < 1000) {
+    return `${Math.round(timeMs)}ms`;
+  }
+  return `${(timeMs / 1000).toFixed(2)}s`;
 }
 
 function cellLength(text: string): number {

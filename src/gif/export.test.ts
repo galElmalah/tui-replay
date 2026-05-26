@@ -21,7 +21,10 @@ test("exports terminal frames as an animated gif", async () => {
       cellWidth: 6,
       lineHeight: 13,
       padding: 4,
-      lastDelayMs: 120
+      lastDelayMs: 120,
+      overlay: {
+        position: "top-left"
+      }
     });
 
     const bytes = await readFile(outputPath);
