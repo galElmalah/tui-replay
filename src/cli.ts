@@ -12,7 +12,7 @@ const program = new Command();
 program
   .name("tui-replay")
   .description("Replay viewer for @microsoft/tui-test traces.")
-  .version("0.2.0");
+  .version("0.3.0");
 
 program
   .command("preview")

@@ -1,6 +1,6 @@
 {
   "name": "tui-replay",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Web, terminal, GIF, and video replay viewer for @microsoft/tui-test traces.",
   "keywords": [
     "tui",
