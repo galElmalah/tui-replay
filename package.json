@@ -46,7 +46,8 @@
   "files": [
     "dist",
     "docs/screenshots",
-    "README.md"
+    "README.md",
+    "AGENTS.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
