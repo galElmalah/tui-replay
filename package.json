@@ -1,14 +1,15 @@
 {
   "name": "tui-replay",
   "version": "0.2.0",
-  "description": "Web, terminal, and GIF replay viewer for @microsoft/tui-test traces.",
+  "description": "Web, terminal, GIF, and video replay viewer for @microsoft/tui-test traces.",
   "keywords": [
     "tui",
     "terminal",
     "replay",
     "trace",
     "tui-test",
-    "gif"
+    "gif",
+    "video"
   ],
   "homepage": "https://github.com/galElmalah/tui-replay#readme",
   "bugs": {
@@ -33,6 +34,10 @@
     "./gif": {
       "types": "./dist/gif/export.d.ts",
       "import": "./dist/gif/export.js"
+    },
+    "./video": {
+      "types": "./dist/video/export.d.ts",
+      "import": "./dist/video/export.js"
     }
   },
   "bin": {
@@ -48,6 +53,7 @@
     "test": "npm run build && node --test \"dist/**/*.test.js\"",
     "preview": "npm run build && node dist/cli.js preview",
     "gif": "npm run build && node dist/cli.js gif",
+    "video": "npm run build && node dist/cli.js video",
     "tui": "npm run build && node dist/cli.js tui"
   },
   "dependencies": {
