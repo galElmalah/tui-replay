@@ -1,8 +1,9 @@
 import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
+import { loadResolvedTraceAnnotations } from "../trace/annotations.js";
 import { loadTraceInputs } from "../trace/load.js";
 import { renderTraceFrames } from "../trace/render.js";
-import type { RenderedFrame } from "../trace/types.js";
+import type { RenderedFrame, ResolvedTraceAnnotation } from "../trace/types.js";
 
 const DEFAULT_BACKGROUND = "#101318";
 const DEFAULT_FOREGROUND = "#e4e7eb";
@@ -65,6 +66,7 @@ export type TerminalRenderMetrics = {
 export type TerminalRenderSource = {
   tracePath: string;
   frames: RenderedFrame[];
+  annotations: ResolvedTraceAnnotation[];
   metrics: TerminalRenderMetrics;
   durationMs: number;
 };
@@ -86,21 +88,23 @@ export async function loadTerminalRenderSource(
   if (frames.length === 0) {
     throw new Error(`Trace has no renderable frames: ${selected.filePath}`);
   }
+  const annotations = await loadResolvedTraceAnnotations(selected.filePath, frames);
 
   return {
     tracePath: selected.filePath,
     frames,
+    annotations,
     metrics: createMetrics(frames, options, renderOptions),
     durationMs: frames.at(-1)?.time ?? 0
   };
 }
 
-export function renderTerminalFramePng(frame: RenderedFrame, metrics: TerminalRenderMetrics): Buffer {
-  return renderTerminalFrame(frame, metrics).asPng();
+export function renderTerminalFramePng(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[] = []): Buffer {
+  return renderTerminalFrame(frame, metrics, annotations).asPng();
 }
 
-export function renderTerminalFramePixels(frame: RenderedFrame, metrics: TerminalRenderMetrics): Buffer {
-  return renderTerminalFrame(frame, metrics).pixels;
+export function renderTerminalFramePixels(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[] = []): Buffer {
+  return renderTerminalFrame(frame, metrics, annotations).pixels;
 }
 
 export function terminalFrameDelay(frames: RenderedFrame[], index: number, options: TerminalRenderOptions): number {
@@ -119,8 +123,8 @@ export function defaultTerminalOutputPath(tracePath: string, extension: string):
   return `${parsed.name || parsed.base}.${extension}`;
 }
 
-function renderTerminalFrame(frame: RenderedFrame, metrics: TerminalRenderMetrics) {
-  const svg = terminalFrameToSvg(frame, metrics);
+function renderTerminalFrame(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]) {
+  const svg = terminalFrameToSvg(frame, metrics, annotations);
   return new Resvg(svg, {
     font: {
       loadSystemFonts: true,
@@ -134,7 +138,7 @@ function renderTerminalFrame(frame: RenderedFrame, metrics: TerminalRenderMetric
   }).render();
 }
 
-function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics): string {
+function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]): string {
   const parts = [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${metrics.width}" height="${metrics.height}" viewBox="0 0 ${metrics.width} ${metrics.height}">`,
     `<rect width="100%" height="100%" fill="${escapeAttribute(metrics.theme.background)}"/>`
@@ -178,32 +182,59 @@ function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics
   }
 
   if (metrics.overlay.enabled) {
-    parts.push(renderOverlay(frame, metrics));
+    parts.push(renderOverlay(frame, metrics, annotations));
   }
 
   parts.push("</svg>");
   return parts.join("");
 }
 
-function renderOverlay(frame: RenderedFrame, metrics: TerminalRenderMetrics): string {
-  const label = `Frame ${frame.index + 1} / ${metrics.frameCount} | ${formatTimestamp(frame.time)}`;
+function renderOverlay(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]): string {
+  const lines = [`Frame ${frame.index + 1} / ${metrics.frameCount} | ${formatTimestamp(frame.time)}`];
+  for (const annotation of annotations.slice(0, 3)) {
+    const counts = annotationCounts(annotation);
+    lines.push(`${annotation.kind ? `${annotation.kind}: ` : ""}${annotation.label}${counts ? ` (${counts})` : ""}`);
+  }
+  if (annotations.length > 3) {
+    lines.push(`+${annotations.length - 3} more annotation${annotations.length - 3 === 1 ? "" : "s"}`);
+  }
+
   const fontSize = Math.max(7, metrics.fontSize * 0.78);
   const paddingX = Math.max(5, metrics.fontSize * 0.45);
   const paddingY = Math.max(3, metrics.fontSize * 0.28);
   const margin = Math.max(4, metrics.padding * 0.45);
-  const width = Math.min(metrics.width - margin * 2, label.length * fontSize * 0.62 + paddingX * 2);
-  const height = fontSize + paddingY * 2;
+  const width = Math.min(metrics.width - margin * 2, Math.max(...lines.map((line) => line.length)) * fontSize * 0.62 + paddingX * 2);
+  const lineGap = Math.max(1, fontSize * 0.26);
+  const height = lines.length * fontSize + Math.max(0, lines.length - 1) * lineGap + paddingY * 2;
   const x = metrics.overlay.position.endsWith("right") ? metrics.width - margin - width : margin;
   const y = metrics.overlay.position.startsWith("bottom") ? metrics.height - margin - height : margin;
   const textX = x + paddingX;
   const textY = y + paddingY + fontSize * 0.82;
+  const label = lines.join(" | ");
 
   return [
     `<g aria-label="${escapeAttribute(label)}">`,
     `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(width)}" height="${formatNumber(height)}" rx="${formatNumber(Math.max(4, height / 3))}" fill="${escapeAttribute(metrics.overlay.background)}" opacity="0.82"/>`,
-    `<text x="${formatNumber(textX)}" y="${formatNumber(textY)}" xml:space="preserve" fill="${escapeAttribute(metrics.overlay.foreground)}" font-family="${escapeAttribute(metrics.fontFamily)}" font-size="${formatNumber(fontSize)}" font-weight="700">${escapeText(label)}</text>`,
+    ...lines.map(
+      (line, index) =>
+        `<text x="${formatNumber(textX)}" y="${formatNumber(textY + index * (fontSize + lineGap))}" xml:space="preserve" fill="${escapeAttribute(metrics.overlay.foreground)}" font-family="${escapeAttribute(metrics.fontFamily)}" font-size="${formatNumber(fontSize)}" font-weight="${index === 0 ? 700 : 600}">${escapeText(line)}</text>`
+    ),
     "</g>"
   ].join("");
+}
+
+function annotationCounts(annotation: ResolvedTraceAnnotation): string {
+  const parts = [];
+  const assertionCount = annotation.assertions.length;
+  const attachmentCount =
+    annotation.attachments.length + annotation.assertions.reduce((count, assertion) => count + (assertion.attachments?.length ?? 0), 0);
+  if (assertionCount > 0) {
+    parts.push(`${assertionCount} assert${assertionCount === 1 ? "" : "s"}`);
+  }
+  if (attachmentCount > 0) {
+    parts.push(`${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`);
+  }
+  return parts.join(", ");
 }
 
 function createMetrics(

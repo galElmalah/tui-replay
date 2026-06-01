@@ -34,7 +34,11 @@ export async function exportTerminalGif(options: ExportTerminalGifOptions): Prom
   const encoder = gifenc.GIFEncoder({ initialCapacity: source.metrics.width * source.metrics.height });
 
   for (const [index, frame] of source.frames.entries()) {
-    const pixels = renderTerminalFramePixels(frame, source.metrics);
+    const pixels = renderTerminalFramePixels(
+      frame,
+      source.metrics,
+      source.annotations.filter((annotation) => annotation.frameIndex === frame.index)
+    );
     const palette = gifenc.quantize(pixels, 256, { format: "rgb565" });
     const indexed = gifenc.applyPalette(pixels, palette, "rgb565");
     encoder.writeFrame(indexed, source.metrics.width, source.metrics.height, {

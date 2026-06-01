@@ -59,6 +59,8 @@ Whenever a command or flag changes, update the CLI reference in `README.md` in t
 - Keep media exports terminal-surface-only unless the user explicitly asks for viewer chrome.
 - Do not fake terminal output with inserted newlines. Render frames from the trace and terminal state.
 - Preserve trace sidecars. Annotation files are named `<trace>.annotations.json` and should not mutate upstream trace files.
+- Annotation SDK changes must stay visible in all render surfaces: web timeline/details, OpenTUI event rail/details, and GIF/video overlays when `--overlay` is enabled.
+- Annotation attachments may point at local files or URLs. Relative local paths should resolve next to the trace file.
 
 ## Testing Notes
 

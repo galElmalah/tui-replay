@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import type { TraceAnnotation, TraceAnnotationsFile } from "./trace/types.js";
+import type { TraceAnnotation, TraceAnnotationAssertion, TraceAnnotationAttachment, TraceAnnotationsFile } from "./trace/types.js";
 
 export type AnnotationSidecarOptions = {
   annotationPath?: string;
@@ -103,6 +103,52 @@ function normalizeAnnotation(annotation: TraceAnnotationInput, index: number): T
   return {
     ...annotation,
     label: annotation.label.trim(),
-    description: annotation.description?.trim()
+    description: annotation.description?.trim(),
+    assertions: annotation.assertions?.map((assertion, assertionIndex) =>
+      normalizeAssertion(assertion, `Trace annotation "${annotation.label}" assertion ${assertionIndex}`)
+    ),
+    attachments: annotation.attachments?.map((attachment, attachmentIndex) =>
+      normalizeAttachment(attachment, `Trace annotation "${annotation.label}" attachment ${attachmentIndex}`)
+    )
+  };
+}
+
+function normalizeAssertion(assertion: TraceAnnotationAssertion, context: string): TraceAnnotationAssertion {
+  if (!assertion || typeof assertion !== "object") {
+    throw new Error(`${context} is invalid`);
+  }
+
+  if (typeof assertion.label !== "string" || assertion.label.trim().length === 0) {
+    throw new Error(`${context} is missing a label`);
+  }
+
+  return {
+    ...assertion,
+    label: assertion.label.trim(),
+    message: assertion.message?.trim(),
+    expected: assertion.expected?.trim(),
+    actual: assertion.actual?.trim(),
+    attachments: assertion.attachments?.map((attachment, index) => normalizeAttachment(attachment, `${context} attachment ${index}`))
+  };
+}
+
+function normalizeAttachment(attachment: TraceAnnotationAttachment, context: string): TraceAnnotationAttachment {
+  if (!attachment || typeof attachment !== "object") {
+    throw new Error(`${context} is invalid`);
+  }
+
+  const pathValue = attachment.path?.trim();
+  const urlValue = attachment.url?.trim();
+  if (!pathValue && !urlValue) {
+    throw new Error(`${context} needs path or url`);
+  }
+
+  return {
+    ...attachment,
+    label: attachment.label?.trim(),
+    description: attachment.description?.trim(),
+    path: pathValue,
+    url: urlValue,
+    mimeType: attachment.mimeType?.trim()
   };
 }

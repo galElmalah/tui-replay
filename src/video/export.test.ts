@@ -3,6 +3,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { writeTraceAnnotations } from "../sdk.js";
 import { FFMPEG_NOT_FOUND_CODE, exportTerminalVideo, resolveFfmpegPath } from "./export.js";
 import type { TuiTrace } from "../trace/types.js";
 
@@ -15,6 +16,14 @@ test("exports terminal frames as an mp4 video", { skip: !ffmpegAvailable }, asyn
     const tracePath = path.join(dir, "trace.json");
     const outputPath = path.join(dir, "trace.mp4");
     await writeFile(tracePath, JSON.stringify(sampleTrace()));
+    await writeTraceAnnotations(tracePath, [
+      {
+        frameIndex: 2,
+        label: "Ready assertion",
+        kind: "assertion",
+        assertions: [{ label: "status is ready", passed: true }]
+      }
+    ]);
 
     const result = await exportTerminalVideo({
       input: tracePath,

@@ -170,7 +170,9 @@ class ReplayAppRenderable extends Renderable {
     const frame = trace.frames[this.frameIndex];
     const playState = this.playing ? "playing" : "paused";
     const playIcon = this.playing ? "pause" : "play";
-    const status = `[space ${playIcon}] [speed ↑/↓ ${SPEEDS[this.speedIndex]}x] [frame ←/→ ${this.frameIndex + 1}/${trace.frames.length}] [jump home/end] [trace ./,] [q quit]`;
+    const annotationCount = annotationsForFrame(trace, this.frameIndex).length;
+    const annotationStatus = annotationCount > 0 ? ` [ann ${annotationCount}]` : "";
+    const status = `[space ${playIcon}] [speed ↑/↓ ${SPEEDS[this.speedIndex]}x] [frame ←/→ ${this.frameIndex + 1}/${trace.frames.length}]${annotationStatus} [jump home/end] [trace ./,] [q quit]`;
     const traceLabel = truncate(trace.summary.testTitle, Math.max(12, Math.min(34, width - 22)));
     const title = `TUI Replay  ${trace.summary.frameCount} events  ${trace.summary.cols}x${trace.summary.rows}`;
     const time = `${playState} ${formatDuration(frame.time)}`;
@@ -298,7 +300,7 @@ class ReplayAppRenderable extends Renderable {
       const annotation = frameAnnotations[0];
       const lines = frame.plainText.split("\n").filter(Boolean);
       if (annotation) {
-        buffer.drawText(truncate(annotation.label, thumbWidth - 2), x + 1, y + 2, UI_ANNOTATION, UI_PANEL);
+        buffer.drawText(truncate(annotationSummary(annotation), thumbWidth - 2), x + 1, y + 2, UI_ANNOTATION, UI_PANEL);
         buffer.drawText(truncate(lines[0] ?? "", thumbWidth - 2), x + 1, y + 3, UI_TEXT, UI_PANEL);
       } else {
         buffer.drawText(truncate(lines[0] ?? "", thumbWidth - 2), x + 1, y + 2, UI_TEXT, UI_PANEL);
@@ -318,7 +320,8 @@ class ReplayAppRenderable extends Renderable {
     const detailY = bounds.y + bounds.height - 1;
     const width = Math.max(10, bounds.width - 4);
     const expectation = trace.details.expectations[0];
-    const annotation = annotationsForFrame(trace, this.frameIndex)[0];
+    const annotations = annotationsForFrame(trace, this.frameIndex);
+    const annotation = annotations[0];
     const left = `Trace: ${trace.summary.filePath}`;
     const right = trace.summary.attempt != null ? `Attempt: ${trace.summary.attempt}` : "";
     buffer.drawText(truncate(left, Math.max(0, width - right.length - 2)), x, traceY, UI_TEXT, UI_BG, TextAttributes.BOLD);
@@ -327,7 +330,9 @@ class ReplayAppRenderable extends Renderable {
     }
 
     const detail = annotation
-      ? `${formatDuration(annotation.timeMs)} ${annotation.label}${annotation.description ? ` - ${annotation.description}` : ""}`
+      ? `${annotations.length > 1 ? `${annotations.length} annotations: ` : ""}${formatDuration(annotation.timeMs)} ${annotationSummary(annotation)}${
+          annotation.description ? ` - ${annotation.description}` : ""
+        }`
       : expectation
         ? `${expectation.line}: ${expectation.snippet}`
         : "No test expectations found for this trace.";
@@ -421,6 +426,19 @@ class ReplayAppRenderable extends Renderable {
     this.stopPlayback();
     this.resolveFinished?.();
   }
+}
+
+function annotationSummary(annotation: TraceReplay["annotations"][number]): string {
+  const counts = [];
+  const attachmentCount =
+    annotation.attachments.length + annotation.assertions.reduce((count, assertion) => count + (assertion.attachments?.length ?? 0), 0);
+  if (annotation.assertions.length > 0) {
+    counts.push(`${annotation.assertions.length}a`);
+  }
+  if (attachmentCount > 0) {
+    counts.push(`${attachmentCount}f`);
+  }
+  return `${annotation.label}${counts.length > 0 ? ` (${counts.join("/")})` : ""}`;
 }
 
 type Bounds = {

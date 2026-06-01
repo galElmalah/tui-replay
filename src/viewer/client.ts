@@ -1,5 +1,13 @@
 import { annotationsForFrame, frameIndexAtTime, timelineFrames } from "../preview/selectors.js";
-import type { CellSegment, PreviewModel, RenderedFrame, ResolvedTraceAnnotation, SourceDetails, TraceReplay } from "../trace/types.js";
+import type {
+  CellSegment,
+  PreviewModel,
+  RenderedFrame,
+  ResolvedTraceAnnotation,
+  SourceDetails,
+  TraceAnnotationAttachment,
+  TraceReplay
+} from "../trace/types.js";
 
 type State = {
   model: PreviewModel | undefined;
@@ -377,7 +385,15 @@ function renderFrameNotches(trace: TraceReplay): void {
     marker.className = "annotation-marker";
     marker.style.left = `${progressForTime(trace, annotation.timeMs)}%`;
     marker.style.backgroundColor = annotation.color ?? colorForAnnotation(annotation);
-    marker.title = `${formatDuration(annotation.timeMs)}: ${annotation.label}`;
+    marker.tabIndex = 0;
+    marker.setAttribute("role", "button");
+    marker.setAttribute("aria-label", annotationTooltip(annotation));
+    marker.dataset.tooltip = annotationTooltip(annotation);
+    marker.title = annotationTooltip(annotation);
+    marker.addEventListener("click", () => {
+      stopPlayback();
+      setFrame(annotation.frameIndex);
+    });
     fragment.append(marker);
   });
 
@@ -409,6 +425,8 @@ function renderTimeline(trace: TraceReplay): void {
     const frameAnnotations = annotationsForFrame(trace, frame.index);
     if (frameAnnotations.length > 0) {
       button.classList.add("annotated");
+      button.dataset.tooltip = frameAnnotations.map(annotationTooltip).join("\n\n");
+      button.title = frameAnnotations.map(annotationTooltip).join("\n\n");
       const annotation = document.createElement("span");
       annotation.className = "thumb-annotation";
       annotation.textContent = frameAnnotations[0].label;
@@ -481,18 +499,29 @@ function renderDetails(sourceDetails: SourceDetails, trace: TraceReplay): void {
       annotations.append(empty);
     } else {
       currentAnnotations.forEach((annotation) => {
-        const line = document.createElement("div");
+        const line = document.createElement("article");
         line.className = "annotation-detail";
         const time = document.createElement("code");
         time.textContent = formatDuration(annotation.timeMs);
         const label = document.createElement("strong");
         label.textContent = annotation.label;
-        line.append(time, label);
+        const meta = document.createElement("div");
+        meta.className = "annotation-meta";
+        meta.append(time, label);
+        if (annotation.kind) {
+          const kind = document.createElement("span");
+          kind.className = "annotation-kind";
+          kind.textContent = annotation.kind;
+          meta.append(kind);
+        }
+        line.append(meta);
         if (annotation.description) {
           const description = document.createElement("span");
+          description.className = "annotation-description";
           description.textContent = annotation.description;
           line.append(description);
         }
+        renderAnnotationEvidence(annotation, line);
         annotations.append(line);
       });
     }
@@ -624,7 +653,7 @@ function modelSignature(model: PreviewModel): string {
             (annotation) =>
               `${annotation.id}:${annotation.timeMs}:${annotation.frameIndex}:${annotation.kind ?? ""}:${annotation.color ?? ""}:${annotation.label}:${
                 annotation.description ?? ""
-              }`
+              }:${JSON.stringify(annotation.assertions)}:${JSON.stringify(annotation.attachments)}`
           )
           .join("\u001d")
       ].join("\u001f");
@@ -658,6 +687,109 @@ function colorForAnnotation(annotation: ResolvedTraceAnnotation): string {
     default:
       return "#2664d8";
   }
+}
+
+function annotationTooltip(annotation: ResolvedTraceAnnotation): string {
+  const lines = [`${formatDuration(annotation.timeMs)} · ${annotation.label}`];
+  if (annotation.description) {
+    lines.push(annotation.description);
+  }
+  const counts = annotationEvidenceCounts(annotation);
+  if (counts) {
+    lines.push(counts);
+  }
+  for (const assertion of annotation.assertions.slice(0, 3)) {
+    lines.push(`assert: ${assertion.label}${assertion.passed == null ? "" : assertion.passed ? " passed" : " failed"}`);
+  }
+  return lines.join("\n");
+}
+
+function annotationEvidenceCounts(annotation: ResolvedTraceAnnotation): string {
+  const attachmentCount =
+    annotation.attachments.length + annotation.assertions.reduce((count, assertion) => count + (assertion.attachments?.length ?? 0), 0);
+  const parts = [];
+  if (annotation.assertions.length > 0) {
+    parts.push(`${annotation.assertions.length} assert${annotation.assertions.length === 1 ? "" : "s"}`);
+  }
+  if (attachmentCount > 0) {
+    parts.push(`${attachmentCount} attachment${attachmentCount === 1 ? "" : "s"}`);
+  }
+  return parts.join(" · ");
+}
+
+function renderAnnotationEvidence(annotation: ResolvedTraceAnnotation, parent: HTMLElement): void {
+  if (annotation.assertions.length === 0 && annotation.attachments.length === 0) {
+    return;
+  }
+
+  const evidence = document.createElement("div");
+  evidence.className = "annotation-evidence";
+
+  annotation.assertions.forEach((assertion) => {
+    const row = document.createElement("div");
+    row.className = `annotation-assertion${assertion.passed === false ? " failed" : assertion.passed === true ? " passed" : ""}`;
+    const label = document.createElement("strong");
+    label.textContent = assertion.label;
+    row.append(label);
+    if (assertion.message) {
+      const message = document.createElement("span");
+      message.textContent = assertion.message;
+      row.append(message);
+    }
+    if (assertion.expected || assertion.actual) {
+      const comparison = document.createElement("code");
+      comparison.textContent = [assertion.expected ? `expected: ${assertion.expected}` : "", assertion.actual ? `actual: ${assertion.actual}` : ""]
+        .filter(Boolean)
+        .join(" | ");
+      row.append(comparison);
+    }
+    evidence.append(row);
+    (assertion.attachments ?? []).forEach((attachment) => evidence.append(renderAttachment(attachment)));
+  });
+
+  annotation.attachments.forEach((attachment) => evidence.append(renderAttachment(attachment)));
+  parent.append(evidence);
+}
+
+function renderAttachment(attachment: TraceAnnotationAttachment): HTMLElement {
+  const wrapper = document.createElement("a");
+  wrapper.className = "annotation-attachment";
+  wrapper.href = attachmentHref(attachment);
+  wrapper.target = attachment.url ? "_blank" : "_self";
+  wrapper.rel = "noreferrer";
+
+  if (isImageAttachment(attachment)) {
+    const image = document.createElement("img");
+    image.src = wrapper.href;
+    image.alt = attachment.label ?? attachment.description ?? "Annotation attachment";
+    wrapper.append(image);
+  }
+
+  const label = document.createElement("span");
+  label.textContent = attachment.label ?? attachment.path?.split(/[\\/]/).at(-1) ?? attachment.url ?? "Attachment";
+  wrapper.append(label);
+
+  if (attachment.description) {
+    const description = document.createElement("small");
+    description.textContent = attachment.description;
+    wrapper.append(description);
+  }
+
+  return wrapper;
+}
+
+function attachmentHref(attachment: TraceAnnotationAttachment): string {
+  if (attachment.url) {
+    return attachment.url;
+  }
+  return `/api/annotation-attachment?path=${encodeURIComponent(attachment.path ?? "")}`;
+}
+
+function isImageAttachment(attachment: TraceAnnotationAttachment): boolean {
+  if (attachment.mimeType?.startsWith("image/")) {
+    return true;
+  }
+  return /\.(png|jpe?g|gif|webp|svg)$/i.test(attachment.path ?? attachment.url ?? "");
 }
 
 function centerActiveThumbnail(): void {

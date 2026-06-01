@@ -18,7 +18,15 @@ test("loads sidecar annotations into preview traces", async () => {
         timeMs: 20,
         label: "User completed OAuth",
         kind: "oauth",
-        description: "The callback reached the CLI"
+        description: "The callback reached the CLI",
+        assertions: [
+          {
+            label: "Callback screen matched",
+            passed: true,
+            attachments: [{ path: "callback.png", mimeType: "image/png" }]
+          }
+        ],
+        attachments: [{ url: "https://example.test/evidence.json", mimeType: "application/json" }]
       }
     ]);
 
@@ -29,6 +37,9 @@ test("loads sidecar annotations into preview traces", async () => {
     assert.equal(annotation.kind, "oauth");
     assert.equal(annotation.timeMs, 20);
     assert.equal(annotation.frameIndex, 2);
+    assert.equal(annotation.assertions[0].label, "Callback screen matched");
+    assert.equal(annotation.assertions[0].attachments?.[0]?.path, path.join(dir, "callback.png"));
+    assert.equal(annotation.attachments[0].url, "https://example.test/evidence.json");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

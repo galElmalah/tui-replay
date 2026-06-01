@@ -266,11 +266,33 @@ await appendTraceAnnotation("./.tui-test/cache/tui-traces/oauth-flow", {
   frameIndex: 42,
   label: "OAuth callback received",
   kind: "oauth",
-  color: "#1f8a70"
+  color: "#1f8a70",
+  assertions: [
+    {
+      label: "OAuth callback screen matched",
+      passed: true,
+      attachments: [
+        {
+          label: "callback screenshot",
+          path: "./artifacts/oauth-callback.png",
+          mimeType: "image/png"
+        }
+      ]
+    }
+  ],
+  attachments: [
+    {
+      label: "provider response",
+      path: "./artifacts/oauth-response.json",
+      mimeType: "application/json"
+    }
+  ]
 });
 ```
 
-Annotation targets can use `timeMs`, `frameIndex`, or `eventIndex`. During model building, annotations are resolved to the nearest frame and shown on the timeline, thumbnails, and details surface.
+Annotation targets can use `timeMs`, `frameIndex`, or `eventIndex`. During model building, annotations are resolved to the nearest frame and shown across the web viewer, OpenTUI viewer, and GIF/video overlays when media `--overlay` is enabled. The web viewer also exposes annotation hover tooltips and renders image/file evidence in the details panel.
+
+Attachments can use either `path` or `url`. Relative attachment paths are resolved next to the trace file so tests can write trace evidence into the same artifact directory.
 
 Sidecar format:
 
@@ -283,7 +305,20 @@ Sidecar format:
       "timeMs": 12400,
       "label": "User opened OAuth",
       "kind": "oauth",
-      "description": "The CLI opened the provider authorization URL"
+      "description": "The CLI opened the provider authorization URL",
+      "assertions": [
+        {
+          "label": "OAuth provider page is visible",
+          "passed": true,
+          "attachments": [
+            {
+              "label": "provider screenshot",
+              "path": "./artifacts/provider.png",
+              "mimeType": "image/png"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

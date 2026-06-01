@@ -3,6 +3,7 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { writeTraceAnnotations } from "../sdk.js";
 import { startPreviewServer } from "./preview-server.js";
 import type { PreviewModel, TuiTrace } from "../trace/types.js";
 
@@ -56,6 +57,59 @@ test("pushes trace updates over the event stream when files change", async () =>
     assert.equal(model.traces[0].summary.frameCount, 4);
   } finally {
     abort.abort();
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("serves annotation attachments for web previews", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "tui-replay-"));
+  const tracePath = path.join(dir, "trace.json");
+  const attachmentPath = path.join(dir, "attachment.txt");
+  await writeFile(tracePath, JSON.stringify(sampleTrace(["first"])));
+  await writeFile(attachmentPath, "attachment body");
+  await writeTraceAnnotations(tracePath, [
+    {
+      frameIndex: 1,
+      label: "Attachment evidence",
+      attachments: [{ path: attachmentPath }]
+    }
+  ]);
+  const server = await startPreviewServer({
+    inputs: [tracePath],
+    host: "127.0.0.1",
+    port: 0,
+    projectRoot: dir,
+    openBrowser: false
+  });
+
+  try {
+    const response = await fetch(`${server.url}/api/annotation-attachment?path=${encodeURIComponent(attachmentPath)}`);
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("content-type") ?? "", /^text\/plain/);
+    assert.equal(await response.text(), "attachment body");
+  } finally {
+    await server.close();
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("rejects relative annotation attachment paths", async () => {
+  const dir = await mkdtemp(path.join(os.tmpdir(), "tui-replay-"));
+  const tracePath = path.join(dir, "trace.json");
+  await writeFile(tracePath, JSON.stringify(sampleTrace(["first"])));
+  const server = await startPreviewServer({
+    inputs: [tracePath],
+    host: "127.0.0.1",
+    port: 0,
+    projectRoot: dir,
+    openBrowser: false
+  });
+
+  try {
+    const response = await fetch(`${server.url}/api/annotation-attachment?path=relative.png`);
+    assert.equal(response.status, 400);
+  } finally {
     await server.close();
     await rm(dir, { recursive: true, force: true });
   }

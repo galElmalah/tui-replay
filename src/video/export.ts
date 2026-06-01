@@ -11,6 +11,7 @@ import {
   type TerminalOverlayPosition,
   type TerminalRenderOptions
 } from "../media/terminal-render.js";
+import type { ResolvedTraceAnnotation } from "../trace/types.js";
 
 export type TerminalVideoOverlayPosition = TerminalOverlayPosition;
 export type TerminalVideoOverlayOptions = TerminalOverlayOptions;
@@ -70,7 +71,7 @@ export async function exportTerminalVideo(options: ExportTerminalVideoOptions): 
 
   try {
     const frameRate = options.fps ?? DEFAULT_TERMINAL_VIDEO_FPS;
-    const framePattern = await writeVideoFrames(tempDir, source.frames, source.metrics, renderOptions, frameRate);
+    const framePattern = await writeVideoFrames(tempDir, source.frames, source.annotations, source.metrics, renderOptions, frameRate);
     await mkdir(path.dirname(outputPath), { recursive: true });
     await runFfmpeg(ffmpegPath, [
       "-hide_banner",
@@ -143,6 +144,7 @@ export async function resolveFfmpegPath(explicitPath?: string, env: NodeJS.Proce
 async function writeVideoFrames(
   tempDir: string,
   frames: Awaited<ReturnType<typeof loadTerminalRenderSource>>["frames"],
+  annotations: ResolvedTraceAnnotation[],
   metrics: Awaited<ReturnType<typeof loadTerminalRenderSource>>["metrics"],
   options: ExportTerminalVideoOptions,
   frameRate: number
@@ -150,7 +152,11 @@ async function writeVideoFrames(
   let outputIndex = 0;
 
   for (const [index, frame] of frames.entries()) {
-    const png = renderTerminalFramePng(frame, metrics);
+    const png = renderTerminalFramePng(
+      frame,
+      metrics,
+      annotations.filter((annotation) => annotation.frameIndex === frame.index)
+    );
     const repeat = Math.max(1, Math.round((terminalFrameDelay(frames, index, options) / 1000) * frameRate));
 
     for (let i = 0; i < repeat; i += 1) {

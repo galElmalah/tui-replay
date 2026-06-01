@@ -42,6 +42,23 @@ export type RenderedFrame = {
   plainText: string;
 };
 
+export type TraceAnnotationAttachment = {
+  label?: string;
+  description?: string;
+  path?: string;
+  url?: string;
+  mimeType?: string;
+};
+
+export type TraceAnnotationAssertion = {
+  label: string;
+  message?: string;
+  passed?: boolean;
+  expected?: string;
+  actual?: string;
+  attachments?: TraceAnnotationAttachment[];
+};
+
 export type TraceAnnotation = {
   id?: string;
   label: string;
@@ -51,6 +68,8 @@ export type TraceAnnotation = {
   timeMs?: number;
   frameIndex?: number;
   eventIndex?: number;
+  assertions?: TraceAnnotationAssertion[];
+  attachments?: TraceAnnotationAttachment[];
   payload?: Record<string, unknown>;
 };
 
@@ -64,6 +83,8 @@ export type ResolvedTraceAnnotation = TraceAnnotation & {
   id: string;
   timeMs: number;
   frameIndex: number;
+  assertions: TraceAnnotationAssertion[];
+  attachments: TraceAnnotationAttachment[];
 };
 
 export type TraceSummary = {

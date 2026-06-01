@@ -15,7 +15,27 @@ test("writes and appends trace annotation sidecars", async () => {
         timeMs: 1200,
         label: "User started OAuth",
         kind: "oauth",
-        description: "Browser redirected to provider"
+        description: "Browser redirected to provider",
+        assertions: [
+          {
+            label: "OAuth screen rendered",
+            passed: true,
+            attachments: [
+              {
+                label: "screen",
+                path: "oauth.png",
+                mimeType: "image/png"
+              }
+            ]
+          }
+        ],
+        attachments: [
+          {
+            label: "raw log",
+            url: "https://example.test/log.txt",
+            mimeType: "text/plain"
+          }
+        ]
       }
     ]);
     assert.equal(annotationPath, annotationPathForTrace(tracePath));
@@ -30,6 +50,9 @@ test("writes and appends trace annotation sidecars", async () => {
     assert.equal(file.version, 1);
     assert.equal(file.annotations.length, 2);
     assert.equal(file.annotations[0].label, "User started OAuth");
+    assert.equal(file.annotations[0].assertions?.[0]?.label, "OAuth screen rendered");
+    assert.equal(file.annotations[0].assertions?.[0]?.attachments?.[0]?.path, "oauth.png");
+    assert.equal(file.annotations[0].attachments?.[0]?.url, "https://example.test/log.txt");
     assert.equal(file.annotations[1].frameIndex, 4);
 
     const raw = JSON.parse(await readFile(annotationPath, "utf8")) as { annotations: unknown[] };
@@ -37,6 +60,24 @@ test("writes and appends trace annotation sidecars", async () => {
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+
+test("rejects attachments without path or url", async () => {
+  await assert.rejects(
+    () =>
+      writeTraceAnnotations("/tmp/trace", [
+        {
+          label: "Bad attachment",
+          frameIndex: 0,
+          attachments: [
+            {
+              label: "empty"
+            }
+          ]
+        }
+      ]),
+    /needs path or url/
+  );
 });
 
 test("rejects annotations without a timeline target", async () => {

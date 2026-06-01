@@ -111,6 +111,11 @@ async function handleRequest(
       return;
     }
 
+    if (url.pathname === "/api/annotation-attachment") {
+      await sendAnnotationAttachment(res, url, dataSource);
+      return;
+    }
+
     if (url.pathname === "/assets/client.js") {
       send(res, 200, "text/javascript; charset=utf-8", clientAsset);
       return;
@@ -133,6 +138,31 @@ function send(res: http.ServerResponse, status: number, contentType: string, bod
     "cache-control": "no-store"
   });
   res.end(body);
+}
+
+function sendBuffer(res: http.ServerResponse, status: number, contentType: string, body: Buffer): void {
+  res.writeHead(status, {
+    "content-type": contentType,
+    "cache-control": "no-store"
+  });
+  res.end(body);
+}
+
+async function sendAnnotationAttachment(res: http.ServerResponse, url: URL, dataSource: ReplayDataSource): Promise<void> {
+  const attachmentPath = url.searchParams.get("path");
+  if (!attachmentPath || !path.isAbsolute(attachmentPath)) {
+    send(res, 400, "text/plain; charset=utf-8", "Annotation attachment path must be absolute");
+    return;
+  }
+
+  const allowedPaths = annotationAttachmentPaths(await dataSource.load());
+  if (!allowedPaths.has(attachmentPath)) {
+    send(res, 404, "text/plain; charset=utf-8", "Annotation attachment is not referenced by the current trace model");
+    return;
+  }
+
+  const file = await readFile(attachmentPath);
+  sendBuffer(res, 200, contentTypeForPath(attachmentPath), file);
 }
 
 async function connectSseClient(
@@ -354,4 +384,50 @@ async function readClientAsset(): Promise<string> {
 async function readSelectorAsset(): Promise<string> {
   const selectorPath = new URL("../preview/selectors.js", import.meta.url);
   return readFile(selectorPath, "utf8");
+}
+
+function contentTypeForPath(filePath: string): string {
+  switch (path.extname(filePath).toLowerCase()) {
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".gif":
+      return "image/gif";
+    case ".webp":
+      return "image/webp";
+    case ".svg":
+      return "image/svg+xml";
+    case ".txt":
+    case ".log":
+      return "text/plain; charset=utf-8";
+    case ".json":
+      return "application/json; charset=utf-8";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+function annotationAttachmentPaths(model: Awaited<ReturnType<ReplayDataSource["load"]>>): Set<string> {
+  const paths = new Set<string>();
+
+  for (const trace of model.traces) {
+    for (const annotation of trace.annotations) {
+      for (const attachment of annotation.attachments) {
+        if (attachment.path) {
+          paths.add(attachment.path);
+        }
+      }
+      for (const assertion of annotation.assertions) {
+        for (const attachment of assertion.attachments ?? []) {
+          if (attachment.path) {
+            paths.add(attachment.path);
+          }
+        }
+      }
+    }
+  }
+
+  return paths;
 }

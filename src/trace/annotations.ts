@@ -1,14 +1,20 @@
+import path from "node:path";
 import { readTraceAnnotations } from "../sdk.js";
-import type { RenderedFrame, ResolvedTraceAnnotation, TraceAnnotation } from "./types.js";
+import type { RenderedFrame, ResolvedTraceAnnotation, TraceAnnotation, TraceAnnotationAttachment } from "./types.js";
 
 export async function loadResolvedTraceAnnotations(tracePath: string, frames: RenderedFrame[]): Promise<ResolvedTraceAnnotation[]> {
   const file = await readTraceAnnotations(tracePath);
   return file.annotations
-    .map((annotation, index) => resolveTraceAnnotation(annotation, frames, index))
+    .map((annotation, index) => resolveTraceAnnotation(tracePath, annotation, frames, index))
     .filter((annotation): annotation is ResolvedTraceAnnotation => annotation != null);
 }
 
-function resolveTraceAnnotation(annotation: TraceAnnotation, frames: RenderedFrame[], index: number): ResolvedTraceAnnotation | undefined {
+function resolveTraceAnnotation(
+  tracePath: string,
+  annotation: TraceAnnotation,
+  frames: RenderedFrame[],
+  index: number
+): ResolvedTraceAnnotation | undefined {
   if (frames.length === 0) {
     return undefined;
   }
@@ -20,7 +26,23 @@ function resolveTraceAnnotation(annotation: TraceAnnotation, frames: RenderedFra
     ...annotation,
     id: annotation.id ?? `annotation-${index}`,
     timeMs: annotation.timeMs ?? frame.time,
-    frameIndex
+    frameIndex,
+    assertions: (annotation.assertions ?? []).map((assertion) => ({
+      ...assertion,
+      attachments: assertion.attachments?.map((attachment) => resolveAttachmentPath(tracePath, attachment))
+    })),
+    attachments: (annotation.attachments ?? []).map((attachment) => resolveAttachmentPath(tracePath, attachment))
+  };
+}
+
+function resolveAttachmentPath(tracePath: string, attachment: TraceAnnotationAttachment): TraceAnnotationAttachment {
+  if (!attachment.path) {
+    return attachment;
+  }
+
+  return {
+    ...attachment,
+    path: path.isAbsolute(attachment.path) ? attachment.path : path.resolve(path.dirname(tracePath), attachment.path)
   };
 }
 
