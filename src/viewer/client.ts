@@ -389,7 +389,6 @@ function renderFrameNotches(trace: TraceReplay): void {
     marker.setAttribute("role", "button");
     marker.setAttribute("aria-label", annotationTooltip(annotation));
     marker.dataset.tooltip = annotationTooltip(annotation);
-    marker.title = annotationTooltip(annotation);
     marker.addEventListener("click", () => {
       stopPlayback();
       setFrame(annotation.frameIndex);
@@ -450,7 +449,6 @@ function renderAnnotationTimelineItem(annotation: ResolvedTraceAnnotation): HTML
   button.className = `thumb annotation-thumb${annotation.frameIndex === state.frameIndex ? " active" : ""}`;
   button.setAttribute("aria-label", `Annotation ${annotation.label} at ${formatDuration(annotation.timeMs)}`);
   button.dataset.tooltip = annotationTooltip(annotation);
-  button.title = annotationTooltip(annotation);
   button.addEventListener("pointerdown", rememberPageScroll);
   button.addEventListener("keydown", rememberPageScroll);
   button.addEventListener("click", () => {
