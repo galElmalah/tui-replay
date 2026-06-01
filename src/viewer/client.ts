@@ -1,4 +1,4 @@
-import { annotationsForFrame, frameIndexAtTime, timelineFrames } from "../preview/selectors.js";
+import { annotationsForFrame, frameIndexAtTime, timelineItems } from "../preview/selectors.js";
 import type {
   CellSegment,
   PreviewModel,
@@ -403,9 +403,15 @@ function renderFrameNotches(trace: TraceReplay): void {
 function renderTimeline(trace: TraceReplay): void {
   timeline.innerHTML = "";
   const fragment = document.createDocumentFragment();
-  const frames = timelineFrames(trace.frames, state.frameIndex);
+  const items = timelineItems(trace, state.frameIndex);
 
-  frames.forEach((frame) => {
+  items.forEach((item) => {
+    if (item.type === "annotation") {
+      fragment.append(renderAnnotationTimelineItem(item.annotation));
+      return;
+    }
+
+    const frame = item.frame;
     const button = document.createElement("button");
     button.type = "button";
     button.className = `thumb${frame.index === state.frameIndex ? " active" : ""}`;
@@ -424,14 +430,8 @@ function renderTimeline(trace: TraceReplay): void {
 
     const frameAnnotations = annotationsForFrame(trace, frame.index);
     if (frameAnnotations.length > 0) {
-      button.classList.add("annotated");
-      button.dataset.tooltip = frameAnnotations.map(annotationTooltip).join("\n\n");
-      button.title = frameAnnotations.map(annotationTooltip).join("\n\n");
-      const annotation = document.createElement("span");
-      annotation.className = "thumb-annotation";
-      annotation.textContent = frameAnnotations[0].label;
-      annotation.title = frameAnnotations.map((item) => item.label).join("\n");
-      button.append(annotation);
+      button.classList.add("has-annotation");
+      button.title = `${frameAnnotations.length} annotation${frameAnnotations.length === 1 ? "" : "s"} near this frame`;
     }
 
     const preview = document.createElement("pre");
@@ -442,6 +442,44 @@ function renderTimeline(trace: TraceReplay): void {
 
   timeline.append(fragment);
   centerActiveThumbnail();
+}
+
+function renderAnnotationTimelineItem(annotation: ResolvedTraceAnnotation): HTMLElement {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = `thumb annotation-thumb${annotation.frameIndex === state.frameIndex ? " active" : ""}`;
+  button.setAttribute("aria-label", `Annotation ${annotation.label} at ${formatDuration(annotation.timeMs)}`);
+  button.dataset.tooltip = annotationTooltip(annotation);
+  button.title = annotationTooltip(annotation);
+  button.addEventListener("pointerdown", rememberPageScroll);
+  button.addEventListener("keydown", rememberPageScroll);
+  button.addEventListener("click", () => {
+    stopPlayback();
+    setFrame(annotation.frameIndex);
+  });
+
+  const time = document.createElement("span");
+  time.className = "thumb-time";
+  time.textContent = `Annotation | ${formatDuration(annotation.timeMs)}`;
+  button.append(time);
+
+  const kind = document.createElement("span");
+  kind.className = "thumb-annotation-kind";
+  kind.style.backgroundColor = annotation.color ?? colorForAnnotation(annotation);
+  kind.textContent = annotation.kind ?? "annotation";
+  button.append(kind);
+
+  const label = document.createElement("strong");
+  label.className = "thumb-annotation-title";
+  label.textContent = annotation.label;
+  button.append(label);
+
+  const summary = document.createElement("span");
+  summary.className = "thumb-annotation-summary";
+  summary.textContent = annotationEvidenceCounts(annotation) || (annotation.description ?? `Frame ${annotation.frameIndex + 1}`);
+  button.append(summary);
+
+  return button;
 }
 
 function renderDetails(sourceDetails: SourceDetails, trace: TraceReplay): void {

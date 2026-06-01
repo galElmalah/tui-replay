@@ -290,7 +290,7 @@ await appendTraceAnnotation("./.tui-test/cache/tui-traces/oauth-flow", {
 });
 ```
 
-Annotation targets can use `timeMs`, `frameIndex`, or `eventIndex`. During model building, annotations are resolved to the nearest frame and shown across the web viewer, OpenTUI viewer, and GIF/video overlays when media `--overlay` is enabled. The web viewer also exposes annotation hover tooltips and renders image/file evidence in the details panel.
+Annotation targets can use `timeMs`, `frameIndex`, or `eventIndex`. During model building, annotations are resolved to the nearest frame and shown across the web viewer, OpenTUI viewer, and GIF/video overlays when media `--overlay` is enabled. The web viewer shows annotations as standalone cards in the bottom timeline, includes hover/focus tooltips, and renders image/file evidence in the details panel.
 
 Attachments can use either `path` or `url`. Relative attachment paths are resolved next to the trace file so tests can write trace evidence into the same artifact directory.
 
