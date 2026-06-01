@@ -35,7 +35,7 @@ export function renderIndexHtml(): string {
       <section class="controls" aria-label="Playback controls">
         <div class="scrubber-row">
           <div class="scrubber">
-            <div class="scrubber-track" aria-hidden="true">
+            <div class="scrubber-track">
               <div id="frame-progress" class="frame-progress"></div>
               <div id="frame-notches" class="frame-notches"></div>
             </div>
@@ -416,27 +416,31 @@ select {
 
 .scrubber-track {
   position: absolute;
+  z-index: 3;
   left: 8px;
   right: 8px;
   top: 50%;
   height: 8px;
-  overflow: hidden;
+  overflow: visible;
   border-radius: 999px;
   background: #d8d4ca;
   transform: translateY(-50%);
   box-shadow: inset 0 0 0 1px rgba(31, 37, 46, 0.08);
+  pointer-events: none;
 }
 
 .frame-progress {
   position: absolute;
   inset: 0 auto 0 0;
   width: 0%;
+  height: 100%;
   border-radius: inherit;
   background: #1f252e;
   transition-property: width;
   transition-duration: 160ms;
   transition-timing-function: linear;
   will-change: width;
+  pointer-events: none;
 }
 
 #frame-range {
