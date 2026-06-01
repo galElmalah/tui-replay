@@ -36,6 +36,7 @@ const state: State = {
 };
 let pageScrollBeforeInteraction: { left: number; top: number } | undefined;
 let pollingModel = false;
+const sourceQueryParam = "source";
 
 const stage = requiredElement<HTMLElement>("stage");
 const terminalWindow = requiredElement<HTMLDivElement>("terminal-window");
@@ -65,6 +66,8 @@ async function init(): Promise<void> {
   window.scrollTo(0, 0);
   state.model = await fetchPreviewModel();
   state.modelSignature = modelSignature(state.model);
+  applyTraceSelectionFromUrl();
+  writeSelectedTraceToUrl("replace");
   renderTraceOptions();
   render();
   bindEvents();
@@ -147,6 +150,15 @@ function bindEvents(): void {
       renderTerminal(trace.frames[state.frameIndex]);
     }
   });
+
+  window.addEventListener("popstate", () => {
+    if (applyTraceSelectionFromUrl()) {
+      stopPlayback();
+      state.frameIndex = 0;
+      state.followTail = true;
+      render();
+    }
+  });
 }
 
 function render(): void {
@@ -224,6 +236,7 @@ function applyModelUpdate(model: PreviewModel): void {
     state.traceIndex = nextIndex >= 0 ? nextIndex : clamp(state.traceIndex, 0, Math.max(0, model.traces.length - 1));
   } else if (previousTraces.length === 0 && model.traces.length > 0) {
     state.traceIndex = 0;
+    applyTraceSelectionFromUrl();
   }
 
   const trace = currentTrace();
@@ -242,6 +255,7 @@ function applyModelUpdate(model: PreviewModel): void {
 
   renderTraceOptions();
   render();
+  writeSelectedTraceToUrl("replace");
 }
 
 function renderTraceOptions(): void {
@@ -267,6 +281,7 @@ function selectTrace(index: number): void {
   state.frameIndex = 0;
   state.followTail = true;
   setTraceMenuOpen(false);
+  writeSelectedTraceToUrl("push");
   render();
   restorePageScroll();
 }
@@ -671,6 +686,50 @@ function traceKey(trace: TraceReplay): string {
   return `${trace.summary.filePath}\n${trace.summary.testTitle}\n${trace.summary.attempt ?? ""}`;
 }
 
+function traceSourceValue(trace: TraceReplay, traces = state.model?.traces ?? []): string {
+  const duplicateSources = traces.filter((candidate) => candidate.summary.filePath === trace.summary.filePath).length > 1;
+  return duplicateSources ? traceKey(trace) : trace.summary.filePath;
+}
+
+function traceSourceCandidates(trace: TraceReplay, traces = state.model?.traces ?? []): string[] {
+  return [traceSourceValue(trace, traces), traceKey(trace), trace.summary.filePath, trace.summary.id, trace.summary.testTitle, trace.summary.fileName];
+}
+
+function applyTraceSelectionFromUrl(): boolean {
+  const traces = state.model?.traces ?? [];
+  const source = new URL(window.location.href).searchParams.get(sourceQueryParam);
+  if (!source || traces.length === 0) {
+    return false;
+  }
+
+  const index = traces.findIndex((trace) => traceSourceCandidates(trace, traces).includes(source));
+  if (index < 0 || index === state.traceIndex) {
+    return false;
+  }
+
+  state.traceIndex = index;
+  return true;
+}
+
+function writeSelectedTraceToUrl(mode: "push" | "replace"): void {
+  const trace = currentTrace();
+  const url = new URL(window.location.href);
+  if (trace) {
+    url.searchParams.set(sourceQueryParam, traceSourceValue(trace));
+  } else {
+    url.searchParams.delete(sourceQueryParam);
+  }
+
+  const next = `${url.pathname}${url.search}${url.hash}`;
+  const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (next === current) {
+    return;
+  }
+
+  const stateUpdate = mode === "push" ? window.history.pushState : window.history.replaceState;
+  stateUpdate.call(window.history, null, "", next);
+}
+
 function modelSignature(model: PreviewModel): string {
   return model.traces
     .map((trace) => {
@@ -780,17 +839,31 @@ function renderAnnotationEvidence(annotation: ResolvedTraceAnnotation, parent: H
       row.append(comparison);
     }
     evidence.append(row);
-    (assertion.attachments ?? []).forEach((attachment) => evidence.append(renderAttachment(attachment)));
+    (assertion.attachments ?? []).forEach((attachment) => appendAttachment(evidence, attachment));
   });
 
-  annotation.attachments.forEach((attachment) => evidence.append(renderAttachment(attachment)));
-  parent.append(evidence);
+  annotation.attachments.forEach((attachment) => appendAttachment(evidence, attachment));
+  if (evidence.childElementCount > 0) {
+    parent.append(evidence);
+  }
 }
 
-function renderAttachment(attachment: TraceAnnotationAttachment): HTMLElement {
+function appendAttachment(parent: HTMLElement, attachment: TraceAnnotationAttachment): void {
+  const rendered = renderAttachment(attachment);
+  if (rendered) {
+    parent.append(rendered);
+  }
+}
+
+function renderAttachment(attachment: TraceAnnotationAttachment): HTMLElement | undefined {
+  const href = attachmentHref(attachment);
+  if (!href) {
+    return undefined;
+  }
+
   const wrapper = document.createElement("a");
   wrapper.className = "annotation-attachment";
-  wrapper.href = attachmentHref(attachment);
+  wrapper.href = href;
   wrapper.target = attachment.url ? "_blank" : "_self";
   wrapper.rel = "noreferrer";
 
@@ -814,14 +887,20 @@ function renderAttachment(attachment: TraceAnnotationAttachment): HTMLElement {
   return wrapper;
 }
 
-function attachmentHref(attachment: TraceAnnotationAttachment): string {
+function attachmentHref(attachment: TraceAnnotationAttachment): string | undefined {
   if (attachment.url) {
     return attachment.url;
+  }
+  if (!attachment.path) {
+    return undefined;
   }
   return `/api/annotation-attachment?path=${encodeURIComponent(attachment.path ?? "")}`;
 }
 
 function isImageAttachment(attachment: TraceAnnotationAttachment): boolean {
+  if (!attachment.path && !attachment.url) {
+    return false;
+  }
   if (attachment.mimeType?.startsWith("image/")) {
     return true;
   }
