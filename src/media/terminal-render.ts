@@ -107,6 +107,10 @@ export function renderTerminalFramePixels(frame: RenderedFrame, metrics: Termina
   return renderTerminalFrame(frame, metrics, annotations).pixels;
 }
 
+export function renderTerminalFrameSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[] = []): string {
+  return terminalFrameToSvg(frame, metrics, annotations);
+}
+
 export function terminalFrameDelay(frames: RenderedFrame[], index: number, options: TerminalRenderOptions): number {
   const speed = options.speed ?? 1;
   const minDelay = options.minDelayMs ?? 20;
@@ -124,7 +128,7 @@ export function defaultTerminalOutputPath(tracePath: string, extension: string):
 }
 
 function renderTerminalFrame(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]) {
-  const svg = terminalFrameToSvg(frame, metrics, annotations);
+  const svg = renderTerminalFrameSvg(frame, metrics, annotations);
   return new Resvg(svg, {
     font: {
       loadSystemFonts: true,

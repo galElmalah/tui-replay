@@ -158,7 +158,7 @@ Exports an animated GIF of the terminal display. The exported GIF includes only 
 | `--line-height <px>` | Derived from font size | Terminal line height before scale. |
 | `--padding <px>` | Derived from font size | Terminal padding before scale. |
 | `--font-family <family>` | `Menlo, Monaco, Consolas, monospace` | Terminal font family. |
-| `--overlay` | Disabled | Draw a `Frame x / y | timestamp` metadata pill over the terminal. |
+| `--overlay` | Disabled | Draw a `Frame x / y | timestamp` metadata pill over the terminal. Frame annotations are included when present. |
 | `--overlay-position <position>` | `bottom-right` | Overlay position: `top-left`, `top-right`, `bottom-left`, or `bottom-right`. |
 | `--overlay-background <color>` | `#05080c` | Overlay background color. |
 | `--overlay-foreground <color>` | `#f8fafc` | Overlay text color. |
@@ -203,7 +203,7 @@ If `ffmpeg` cannot be resolved, the CLI exits with an actionable `TUI_REPLAY_FFM
 | `--line-height <px>` | Derived from font size | Terminal line height before scale. |
 | `--padding <px>` | Derived from font size | Terminal padding before scale. |
 | `--font-family <family>` | `Menlo, Monaco, Consolas, monospace` | Terminal font family. |
-| `--overlay` | Disabled | Draw a `Frame x / y | timestamp` metadata pill over the terminal. |
+| `--overlay` | Disabled | Draw a `Frame x / y | timestamp` metadata pill over the terminal. Frame annotations are included when present. |
 | `--overlay-position <position>` | `bottom-right` | Overlay position: `top-left`, `top-right`, `bottom-left`, or `bottom-right`. |
 | `--overlay-background <color>` | `#05080c` | Overlay background color. |
 | `--overlay-foreground <color>` | `#f8fafc` | Overlay text color. |
