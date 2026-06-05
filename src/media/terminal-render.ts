@@ -194,37 +194,107 @@ function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics
 }
 
 function renderOverlay(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]): string {
-  const lines = [`Frame ${frame.index + 1} / ${metrics.frameCount} | ${formatTimestamp(frame.time)}`];
+  const rawLines = [`Frame ${frame.index + 1} / ${metrics.frameCount} | ${formatTimestamp(frame.time)}`];
   for (const annotation of annotations.slice(0, 3)) {
     const counts = annotationCounts(annotation);
-    lines.push(`${annotation.kind ? `${annotation.kind}: ` : ""}${annotation.label}${counts ? ` (${counts})` : ""}`);
+    rawLines.push(`${annotation.kind ? `${annotation.kind}: ` : ""}${annotation.label}${counts ? ` (${counts})` : ""}`);
   }
   if (annotations.length > 3) {
-    lines.push(`+${annotations.length - 3} more annotation${annotations.length - 3 === 1 ? "" : "s"}`);
+    rawLines.push(`+${annotations.length - 3} more annotation${annotations.length - 3 === 1 ? "" : "s"}`);
   }
 
   const fontSize = Math.max(7, metrics.fontSize * 0.78);
   const paddingX = Math.max(5, metrics.fontSize * 0.45);
   const paddingY = Math.max(3, metrics.fontSize * 0.28);
   const margin = Math.max(4, metrics.padding * 0.45);
-  const width = Math.min(metrics.width - margin * 2, Math.max(...lines.map((line) => line.length)) * fontSize * 0.62 + paddingX * 2);
   const lineGap = Math.max(1, fontSize * 0.26);
+  const charWidth = fontSize * 0.62;
+  const maxContentWidth = Math.max(1, metrics.width - margin * 2 - paddingX * 2);
+  const maxContentHeight = Math.max(1, metrics.height - margin * 2 - paddingY * 2);
+  const maxLines = Math.max(1, Math.floor((maxContentHeight + lineGap) / (fontSize + lineGap)));
+  const lines = fitOverlayLines(rawLines, maxContentWidth, charWidth, maxLines);
+  const contentWidth = Math.min(maxContentWidth, Math.max(...lines.map((line) => line.length * charWidth)));
+  const width = contentWidth + paddingX * 2;
   const height = lines.length * fontSize + Math.max(0, lines.length - 1) * lineGap + paddingY * 2;
-  const x = metrics.overlay.position.endsWith("right") ? metrics.width - margin - width : margin;
-  const y = metrics.overlay.position.startsWith("bottom") ? metrics.height - margin - height : margin;
+  const desiredX = metrics.overlay.position.endsWith("right") ? metrics.width - margin - width : margin;
+  const desiredY = metrics.overlay.position.startsWith("bottom") ? metrics.height - margin - height : margin;
+  const x = clampNumber(desiredX, margin, metrics.width - margin - width);
+  const y = clampNumber(desiredY, margin, metrics.height - margin - height);
   const textX = x + paddingX;
   const textY = y + paddingY + fontSize * 0.82;
   const label = lines.join(" | ");
 
   return [
     `<g aria-label="${escapeAttribute(label)}">`,
-    `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(width)}" height="${formatNumber(height)}" rx="${formatNumber(Math.max(4, height / 3))}" fill="${escapeAttribute(metrics.overlay.background)}" opacity="0.82"/>`,
+    `<rect x="${formatNumber(x)}" y="${formatNumber(y)}" width="${formatNumber(width)}" height="${formatNumber(height)}" rx="${formatNumber(Math.max(4, Math.min(8, fontSize * 0.55)))}" fill="${escapeAttribute(metrics.overlay.background)}" opacity="0.9" stroke="${escapeAttribute(metrics.overlay.foreground)}" stroke-opacity="0.22" stroke-width="1"/>`,
     ...lines.map(
       (line, index) =>
         `<text x="${formatNumber(textX)}" y="${formatNumber(textY + index * (fontSize + lineGap))}" xml:space="preserve" fill="${escapeAttribute(metrics.overlay.foreground)}" font-family="${escapeAttribute(metrics.fontFamily)}" font-size="${formatNumber(fontSize)}" font-weight="${index === 0 ? 700 : 600}">${escapeText(line)}</text>`
     ),
     "</g>"
   ].join("");
+}
+
+function fitOverlayLines(rawLines: string[], maxContentWidth: number, charWidth: number, maxLines: number): string[] {
+  const maxChars = Math.max(1, Math.floor(maxContentWidth / charWidth));
+  const wrapped = rawLines.flatMap((line) => wrapOverlayLine(line, maxChars));
+  if (wrapped.length <= maxLines) {
+    return wrapped;
+  }
+
+  const visible = wrapped.slice(0, maxLines);
+  const hidden = wrapped.length - maxLines;
+  visible[visible.length - 1] = ellipsizeOverlayLine(`${visible[visible.length - 1]} (+${hidden} more)`, maxChars);
+  return visible;
+}
+
+function wrapOverlayLine(line: string, maxChars: number): string[] {
+  const words = line.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+
+  for (const word of words) {
+    for (const part of splitOverlayWord(word, maxChars)) {
+      if (!current) {
+        current = part;
+      } else if (current.length + 1 + part.length <= maxChars) {
+        current = `${current} ${part}`;
+      } else {
+        lines.push(current);
+        current = part;
+      }
+    }
+  }
+
+  if (current) {
+    lines.push(current);
+  }
+
+  return lines.length > 0 ? lines : [""];
+}
+
+function splitOverlayWord(word: string, maxChars: number): string[] {
+  if (word.length <= maxChars) {
+    return [word];
+  }
+
+  const parts = [];
+  for (let index = 0; index < word.length; index += maxChars) {
+    parts.push(word.slice(index, index + maxChars));
+  }
+  return parts;
+}
+
+function ellipsizeOverlayLine(line: string, maxChars: number): string {
+  if (line.length <= maxChars) {
+    return line;
+  }
+
+  if (maxChars <= 3) {
+    return line.slice(0, maxChars);
+  }
+
+  return `${line.slice(0, maxChars - 3)}...`;
 }
 
 function annotationCounts(annotation: ResolvedTraceAnnotation): string {
@@ -321,6 +391,13 @@ function formatNumber(value: number): string {
 
 function makeEven(value: number): number {
   return value % 2 === 0 ? value : value + 1;
+}
+
+function clampNumber(value: number, min: number, max: number): number {
+  if (max < min) {
+    return min;
+  }
+  return Math.min(Math.max(value, min), max);
 }
 
 function escapeText(value: string): string {
