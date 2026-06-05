@@ -60,6 +60,24 @@ node dist/cli.js gif examples/simple.tui-trace.json --output simple.gif
 node dist/cli.js video examples/simple.tui-trace.json --output simple.mp4
 ```
 
+## CI Usage
+
+The non-interactive export commands are suitable for CI. `preview` also avoids opening a browser automatically when `CI` is set to any value other than `false`.
+
+```bash
+CI=true tui-replay gif .tui-test/cache/tui-traces/my-test-trace \
+  --output artifacts/my-test.gif \
+  --workers 1 \
+  --font-file /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf
+
+CI=true tui-replay video .tui-test/cache/tui-traces/my-test-trace \
+  --output artifacts/my-test.mp4 \
+  --ffmpeg-path /usr/bin/ffmpeg \
+  --font-file /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf
+```
+
+On minimal Linux runners, install a monospace font package such as `fonts-dejavu-core` or pass `--font-file` to a checked-in or provisioned font. Video export also requires `ffmpeg`; GIF export does not.
+
 ## CLI Reference
 
 The top-level command is:
@@ -100,7 +118,7 @@ Starts a local web server with a clean browser replay UI.
 | `--host <host>` | `127.0.0.1` | Host address to bind. |
 | `--project <dir>` | Current working directory | Project root used to resolve test source files and source assertions. |
 | `--no-watch` | Watch enabled | Disable live trace file watching. |
-| `--no-open` | Opens browser | Do not open the browser automatically. |
+| `--no-open` | Opens browser unless `CI=true` | Do not open the browser automatically. |
 | `-h, --help` | | Show command help. |
 
 Example:
@@ -159,6 +177,7 @@ Exports an animated GIF of the terminal display. The exported GIF includes only 
 | `--line-height <px>` | Derived from font size | Terminal line height before scale. |
 | `--padding <px>` | Derived from font size | Terminal padding before scale. |
 | `--font-family <family>` | `Menlo, Monaco, Consolas, monospace` | Terminal font family. |
+| `--font-file <file>` | Auto-detected | Local font file for deterministic media rendering. Can be repeated. |
 | `--workers <count>` | Auto, up to 4 | Parallel frame workers for GIF preparation. Use `1` to force the optimized single-threaded path. |
 | `--overlay` | Disabled | Draw a `Frame x / y | timestamp` metadata pill over the terminal. Frame annotations are included when present. |
 | `--overlay-position <position>` | `bottom-right` | Overlay position: `top-left`, `top-right`, `bottom-left`, or `bottom-right`. |
@@ -205,6 +224,7 @@ If `ffmpeg` cannot be resolved, the CLI exits with an actionable `TUI_REPLAY_FFM
 | `--line-height <px>` | Derived from font size | Terminal line height before scale. |
 | `--padding <px>` | Derived from font size | Terminal padding before scale. |
 | `--font-family <family>` | `Menlo, Monaco, Consolas, monospace` | Terminal font family. |
+| `--font-file <file>` | Auto-detected | Local font file for deterministic media rendering. Can be repeated. |
 | `--overlay` | Disabled | Draw a `Frame x / y | timestamp` metadata pill over the terminal. Frame annotations are included when present. |
 | `--overlay-position <position>` | `bottom-right` | Overlay position: `top-left`, `top-right`, `bottom-left`, or `bottom-right`. |
 | `--overlay-background <color>` | `#05080c` | Overlay background color. |

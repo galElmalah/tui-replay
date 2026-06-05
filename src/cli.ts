@@ -30,7 +30,7 @@ program
       port: options.port,
       projectRoot: options.project,
       watch: options.watch,
-      openBrowser: options.open
+      openBrowser: options.open && !isCiEnvironment()
     });
 
     process.stdout.write(`TUI Replay preview: ${server.url}\n`);
@@ -61,6 +61,7 @@ program
   .option("--line-height <px>", "terminal line height before scale", parsePositiveNumber)
   .option("--padding <px>", "terminal padding before scale", parseNonNegativeNumber)
   .option("--font-family <family>", "terminal font family", "Menlo, Monaco, Consolas, monospace")
+  .option("--font-file <file>", "local font file for deterministic media rendering; can be repeated", collectValue)
   .option("--workers <count>", "parallel frame workers for GIF preparation; 1 disables worker parallelism", parsePositiveInteger)
   .option("--overlay", "draw frame, timestamp, and annotation metadata over the exported terminal GIF")
   .option("--overlay-position <position>", "overlay position: top-left, top-right, bottom-left, or bottom-right", parseOverlayPosition, "bottom-right")
@@ -82,6 +83,7 @@ program
         lineHeight?: number;
         padding?: number;
         fontFamily: string;
+        fontFile?: string[];
         workers?: number;
         overlay?: boolean;
         overlayPosition: TerminalOverlayPosition;
@@ -104,6 +106,7 @@ program
         lineHeight: options.lineHeight,
         padding: options.padding,
         fontFamily: options.fontFamily,
+        fontFiles: options.fontFile,
         workers: options.workers,
         overlay: options.overlay
           ? {
@@ -139,6 +142,7 @@ program
   .option("--line-height <px>", "terminal line height before scale", parsePositiveNumber)
   .option("--padding <px>", "terminal padding before scale", parseNonNegativeNumber)
   .option("--font-family <family>", "terminal font family", "Menlo, Monaco, Consolas, monospace")
+  .option("--font-file <file>", "local font file for deterministic media rendering; can be repeated", collectValue)
   .option("--overlay", "draw frame, timestamp, and annotation metadata over the exported terminal video")
   .option("--overlay-position <position>", "overlay position: top-left, top-right, bottom-left, or bottom-right", parseOverlayPosition, "bottom-right")
   .option("--overlay-background <color>", "overlay background color", "#05080c")
@@ -163,6 +167,7 @@ program
         lineHeight?: number;
         padding?: number;
         fontFamily: string;
+        fontFile?: string[];
         overlay?: boolean;
         overlayPosition: TerminalOverlayPosition;
         overlayBackground: string;
@@ -188,6 +193,7 @@ program
         lineHeight: options.lineHeight,
         padding: options.padding,
         fontFamily: options.fontFamily,
+        fontFiles: options.fontFile,
         crf: options.crf,
         preset: options.preset,
         overlay: options.overlay
@@ -269,6 +275,10 @@ function parseNonNegativeNumber(value: string): number {
   return parsed;
 }
 
+function collectValue(value: string, previous: string[] = []): string[] {
+  return [...previous, value];
+}
+
 function parseRepeatCount(value: string): number {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < -1) {
@@ -307,6 +317,11 @@ function formatFrameCount(frameCount: number, encodedFrameCount: number): string
 
 function isBunRuntime(): boolean {
   return typeof process.versions === "object" && "bun" in process.versions;
+}
+
+function isCiEnvironment(): boolean {
+  const value = process.env.CI;
+  return value !== undefined && value !== "" && value.toLowerCase() !== "false";
 }
 
 function rerunCurrentCommandWithBun(): Promise<void> {
