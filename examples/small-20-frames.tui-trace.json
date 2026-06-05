@@ -1,0 +1,98 @@
+{
+  "tracePoints": [
+    {
+      "data": "",
+      "time": 1000
+    },
+    {
+      "rows": 18,
+      "cols": 80
+    },
+    {
+      "data": "\u001b[2J\u001b[1;1HTUI Replay 20-frame fixture\u001b[2;1HCompact trace for fast benchmark and media smoke runs\u001b[4;1HStep  Status       Detail\u001b[5;1H----  -----------  ----------------------------------------------",
+      "time": 1025
+    },
+    {
+      "data": "\u001b[3;1HProgress   6% [##..............................]\u001b[6;1H   1  \u001b[37mrunning    \u001b[0m  checkpoint 01 rendered  11 cells\u001b[K\u001b[17;1HLast update:  1 / 18 at 120ms\u001b[K",
+      "time": 1120
+    },
+    {
+      "data": "\u001b[3;1HProgress  11% [####............................]\u001b[7;1H   2  \u001b[36mwaiting    \u001b[0m  checkpoint 02 rendered  22 cells\u001b[K\u001b[17;1HLast update:  2 / 18 at 190ms\u001b[K",
+      "time": 1190
+    },
+    {
+      "data": "\u001b[3;1HProgress  17% [#####...........................]\u001b[8;1H   3  \u001b[33masserting  \u001b[0m  checkpoint 03 rendered  33 cells\u001b[K\u001b[17;1HLast update:  3 / 18 at 260ms\u001b[K",
+      "time": 1260
+    },
+    {
+      "data": "\u001b[3;1HProgress  22% [#######.........................]\u001b[9;1H   4  \u001b[32mcomplete   \u001b[0m  checkpoint 04 rendered  44 cells\u001b[K\u001b[17;1HLast update:  4 / 18 at 330ms\u001b[K",
+      "time": 1330
+    },
+    {
+      "data": "\u001b[3;1HProgress  28% [#########.......................]\u001b[10;1H   5  \u001b[37mqueued     \u001b[0m  checkpoint 05 rendered  55 cells\u001b[K\u001b[17;1HLast update:  5 / 18 at 400ms\u001b[K",
+      "time": 1400
+    },
+    {
+      "data": "\u001b[3;1HProgress  33% [###########.....................]\u001b[11;1H   6  \u001b[37mrunning    \u001b[0m  checkpoint 06 rendered  66 cells\u001b[K\u001b[17;1HLast update:  6 / 18 at 470ms\u001b[K",
+      "time": 1470
+    },
+    {
+      "data": "\u001b[3;1HProgress  39% [############....................]\u001b[12;1H   7  \u001b[36mwaiting    \u001b[0m  checkpoint 07 rendered  77 cells\u001b[K\u001b[17;1HLast update:  7 / 18 at 540ms\u001b[K",
+      "time": 1540
+    },
+    {
+      "data": "\u001b[3;1HProgress  44% [##############..................]\u001b[13;1H   8  \u001b[33masserting  \u001b[0m  checkpoint 08 rendered  88 cells\u001b[K\u001b[17;1HLast update:  8 / 18 at 610ms\u001b[K",
+      "time": 1610
+    },
+    {
+      "data": "\u001b[3;1HProgress  50% [################................]\u001b[14;1H   9  \u001b[32mcomplete   \u001b[0m  checkpoint 09 rendered  99 cells\u001b[K\u001b[17;1HLast update:  9 / 18 at 680ms\u001b[K",
+      "time": 1680
+    },
+    {
+      "data": "\u001b[3;1HProgress  56% [##################..............]\u001b[15;1H  10  \u001b[37mqueued     \u001b[0m  checkpoint 10 rendered 110 cells\u001b[K\u001b[17;1HLast update: 10 / 18 at 750ms\u001b[K",
+      "time": 1750
+    },
+    {
+      "data": "\u001b[3;1HProgress  61% [####################............]\u001b[6;1H  11  \u001b[37mrunning    \u001b[0m  checkpoint 11 rendered 121 cells\u001b[K\u001b[17;1HLast update: 11 / 18 at 820ms\u001b[K",
+      "time": 1820
+    },
+    {
+      "data": "\u001b[3;1HProgress  67% [#####################...........]\u001b[7;1H  12  \u001b[36mwaiting    \u001b[0m  checkpoint 12 rendered 132 cells\u001b[K\u001b[17;1HLast update: 12 / 18 at 890ms\u001b[K",
+      "time": 1890
+    },
+    {
+      "data": "\u001b[3;1HProgress  72% [#######################.........]\u001b[8;1H  13  \u001b[33masserting  \u001b[0m  checkpoint 13 rendered 143 cells\u001b[K\u001b[17;1HLast update: 13 / 18 at 960ms\u001b[K",
+      "time": 1960
+    },
+    {
+      "data": "\u001b[3;1HProgress  78% [#########################.......]\u001b[9;1H  14  \u001b[32mcomplete   \u001b[0m  checkpoint 14 rendered 154 cells\u001b[K\u001b[17;1HLast update: 14 / 18 at 1030ms\u001b[K",
+      "time": 2030
+    },
+    {
+      "data": "\u001b[3;1HProgress  83% [###########################.....]\u001b[10;1H  15  \u001b[37mqueued     \u001b[0m  checkpoint 15 rendered 165 cells\u001b[K\u001b[17;1HLast update: 15 / 18 at 1100ms\u001b[K",
+      "time": 2100
+    },
+    {
+      "data": "\u001b[3;1HProgress  89% [############################....]\u001b[11;1H  16  \u001b[37mrunning    \u001b[0m  checkpoint 16 rendered 176 cells\u001b[K\u001b[17;1HLast update: 16 / 18 at 1170ms\u001b[K",
+      "time": 2170
+    },
+    {
+      "data": "\u001b[3;1HProgress  94% [##############################..]\u001b[12;1H  17  \u001b[36mwaiting    \u001b[0m  checkpoint 17 rendered 187 cells\u001b[K\u001b[17;1HLast update: 17 / 18 at 1240ms\u001b[K",
+      "time": 2240
+    },
+    {
+      "data": "\u001b[3;1HProgress 100% [################################]\u001b[13;1H  18  \u001b[33masserting  \u001b[0m  checkpoint 18 rendered 198 cells\u001b[K\u001b[17;1HLast update: 18 / 18 at 1310ms\u001b[K",
+      "time": 2310
+    }
+  ],
+  "testPath": [
+    "examples",
+    "small-20-frames.tui.test.ts",
+    "1",
+    "1"
+  ],
+  "testName": [
+    "small 20 frame trace"
+  ],
+  "attempt": 0
+}

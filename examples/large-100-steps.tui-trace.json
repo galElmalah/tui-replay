@@ -1,0 +1,426 @@
+{
+  "tracePoints": [
+    {
+      "data": "",
+      "time": 1000
+    },
+    {
+      "rows": 36,
+      "cols": 120
+    },
+    {
+      "data": "\u001b[2J\u001b[1;1HTUI Replay large trace fixture\u001b[2;1H100 deterministic steps for renderer and GIF/video benchmarks\u001b[4;1HStep   Time    Status       Detail\u001b[5;1H----   ------  -----------  ------------------------------------------------------------",
+      "time": 1025
+    },
+    {
+      "data": "\u001b[3;1HProgress   1% [#.................................................]\u001b[6;1H   1      95ms  \u001b[37mrunning    \u001b[0m  checkpoint 001 wrote    7 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:   1 / 100 at 95ms\u001b[K\u001b[33;1HChecksum: 07919\u001b[K",
+      "time": 1095
+    },
+    {
+      "data": "\u001b[3;1HProgress   2% [#.................................................]\u001b[7;1H   2     140ms  \u001b[36mwaiting    \u001b[0m  checkpoint 002 wrote   14 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:   2 / 100 at 140ms\u001b[K\u001b[33;1HChecksum: 15838\u001b[K",
+      "time": 1140
+    },
+    {
+      "data": "\u001b[3;1HProgress   3% [##................................................]\u001b[8;1H   3     185ms  \u001b[33masserting  \u001b[0m  checkpoint 003 wrote   21 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:   3 / 100 at 185ms\u001b[K\u001b[33;1HChecksum: 23757\u001b[K",
+      "time": 1185
+    },
+    {
+      "data": "\u001b[3;1HProgress   4% [##................................................]\u001b[9;1H   4     230ms  \u001b[32mcomplete   \u001b[0m  checkpoint 004 wrote   28 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:   4 / 100 at 230ms\u001b[K\u001b[33;1HChecksum: 31676\u001b[K",
+      "time": 1230
+    },
+    {
+      "data": "\u001b[3;1HProgress   5% [###...............................................]\u001b[10;1H   5     275ms  \u001b[37mqueued     \u001b[0m  checkpoint 005 wrote   35 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:   5 / 100 at 275ms\u001b[K\u001b[33;1HChecksum: 39595\u001b[K",
+      "time": 1275
+    },
+    {
+      "data": "\u001b[3;1HProgress   6% [###...............................................]\u001b[11;1H   6     320ms  \u001b[37mrunning    \u001b[0m  checkpoint 006 wrote   42 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:   6 / 100 at 320ms\u001b[K\u001b[33;1HChecksum: 47514\u001b[K",
+      "time": 1320
+    },
+    {
+      "data": "\u001b[3;1HProgress   7% [####..............................................]\u001b[12;1H   7     365ms  \u001b[36mwaiting    \u001b[0m  checkpoint 007 wrote   49 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:   7 / 100 at 365ms\u001b[K\u001b[33;1HChecksum: 55433\u001b[K",
+      "time": 1365
+    },
+    {
+      "data": "\u001b[3;1HProgress   8% [####..............................................]\u001b[13;1H   8     410ms  \u001b[33masserting  \u001b[0m  checkpoint 008 wrote   56 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:   8 / 100 at 410ms\u001b[K\u001b[33;1HChecksum: 63352\u001b[K",
+      "time": 1410
+    },
+    {
+      "data": "\u001b[3;1HProgress   9% [#####.............................................]\u001b[14;1H   9     455ms  \u001b[32mcomplete   \u001b[0m  checkpoint 009 wrote   63 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:   9 / 100 at 455ms\u001b[K\u001b[33;1HChecksum: 71271\u001b[K",
+      "time": 1455
+    },
+    {
+      "data": "\u001b[3;1HProgress  10% [#####.............................................]\u001b[15;1H  10     500ms  \u001b[37mqueued     \u001b[0m  checkpoint 010 wrote   70 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  10 / 100 at 500ms\u001b[K\u001b[33;1HChecksum: 79190\u001b[K",
+      "time": 1500
+    },
+    {
+      "data": "\u001b[3;1HProgress  11% [######............................................]\u001b[16;1H  11     545ms  \u001b[37mrunning    \u001b[0m  checkpoint 011 wrote   77 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  11 / 100 at 545ms\u001b[K\u001b[33;1HChecksum: 87109\u001b[K",
+      "time": 1545
+    },
+    {
+      "data": "\u001b[3;1HProgress  12% [######............................................]\u001b[17;1H  12     590ms  \u001b[36mwaiting    \u001b[0m  checkpoint 012 wrote   84 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  12 / 100 at 590ms\u001b[K\u001b[33;1HChecksum: 95028\u001b[K",
+      "time": 1590
+    },
+    {
+      "data": "\u001b[3;1HProgress  13% [#######...........................................]\u001b[18;1H  13     635ms  \u001b[33masserting  \u001b[0m  checkpoint 013 wrote   91 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  13 / 100 at 635ms\u001b[K\u001b[33;1HChecksum: 02947\u001b[K",
+      "time": 1635
+    },
+    {
+      "data": "\u001b[3;1HProgress  14% [#######...........................................]\u001b[19;1H  14     680ms  \u001b[32mcomplete   \u001b[0m  checkpoint 014 wrote   98 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  14 / 100 at 680ms\u001b[K\u001b[33;1HChecksum: 10866\u001b[K",
+      "time": 1680
+    },
+    {
+      "data": "\u001b[3;1HProgress  15% [########..........................................]\u001b[20;1H  15     725ms  \u001b[37mqueued     \u001b[0m  checkpoint 015 wrote  105 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  15 / 100 at 725ms\u001b[K\u001b[33;1HChecksum: 18785\u001b[K",
+      "time": 1725
+    },
+    {
+      "data": "\u001b[3;1HProgress  16% [########..........................................]\u001b[21;1H  16     770ms  \u001b[37mrunning    \u001b[0m  checkpoint 016 wrote  112 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  16 / 100 at 770ms\u001b[K\u001b[33;1HChecksum: 26704\u001b[K",
+      "time": 1770
+    },
+    {
+      "data": "\u001b[3;1HProgress  17% [#########.........................................]\u001b[22;1H  17     815ms  \u001b[36mwaiting    \u001b[0m  checkpoint 017 wrote  119 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  17 / 100 at 815ms\u001b[K\u001b[33;1HChecksum: 34623\u001b[K",
+      "time": 1815
+    },
+    {
+      "data": "\u001b[3;1HProgress  18% [#########.........................................]\u001b[23;1H  18     860ms  \u001b[33masserting  \u001b[0m  checkpoint 018 wrote  126 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  18 / 100 at 860ms\u001b[K\u001b[33;1HChecksum: 42542\u001b[K",
+      "time": 1860
+    },
+    {
+      "data": "\u001b[3;1HProgress  19% [##########........................................]\u001b[24;1H  19     905ms  \u001b[32mcomplete   \u001b[0m  checkpoint 019 wrote  133 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  19 / 100 at 905ms\u001b[K\u001b[33;1HChecksum: 50461\u001b[K",
+      "time": 1905
+    },
+    {
+      "data": "\u001b[3;1HProgress  20% [##########........................................]\u001b[25;1H  20     950ms  \u001b[37mqueued     \u001b[0m  checkpoint 020 wrote  140 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  20 / 100 at 950ms\u001b[K\u001b[33;1HChecksum: 58380\u001b[K",
+      "time": 1950
+    },
+    {
+      "data": "\u001b[3;1HProgress  21% [###########.......................................]\u001b[26;1H  21     995ms  \u001b[37mrunning    \u001b[0m  checkpoint 021 wrote  147 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  21 / 100 at 995ms\u001b[K\u001b[33;1HChecksum: 66299\u001b[K",
+      "time": 1995
+    },
+    {
+      "data": "\u001b[3;1HProgress  22% [###########.......................................]\u001b[27;1H  22    1040ms  \u001b[36mwaiting    \u001b[0m  checkpoint 022 wrote  154 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  22 / 100 at 1040ms\u001b[K\u001b[33;1HChecksum: 74218\u001b[K",
+      "time": 2040
+    },
+    {
+      "data": "\u001b[3;1HProgress  23% [############......................................]\u001b[28;1H  23    1085ms  \u001b[33masserting  \u001b[0m  checkpoint 023 wrote  161 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  23 / 100 at 1085ms\u001b[K\u001b[33;1HChecksum: 82137\u001b[K",
+      "time": 2085
+    },
+    {
+      "data": "\u001b[3;1HProgress  24% [############......................................]\u001b[29;1H  24    1130ms  \u001b[32mcomplete   \u001b[0m  checkpoint 024 wrote  168 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  24 / 100 at 1130ms\u001b[K\u001b[33;1HChecksum: 90056\u001b[K",
+      "time": 2130
+    },
+    {
+      "data": "\u001b[3;1HProgress  25% [#############.....................................]\u001b[30;1H  25    1175ms  \u001b[37mqueued     \u001b[0m  checkpoint 025 wrote  175 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  25 / 100 at 1175ms\u001b[K\u001b[33;1HChecksum: 97975\u001b[K",
+      "time": 2175
+    },
+    {
+      "data": "\u001b[3;1HProgress  26% [#############.....................................]\u001b[6;1H  26    1220ms  \u001b[37mrunning    \u001b[0m  checkpoint 026 wrote  182 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  26 / 100 at 1220ms\u001b[K\u001b[33;1HChecksum: 05894\u001b[K",
+      "time": 2220
+    },
+    {
+      "data": "\u001b[3;1HProgress  27% [##############....................................]\u001b[7;1H  27    1265ms  \u001b[36mwaiting    \u001b[0m  checkpoint 027 wrote  189 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  27 / 100 at 1265ms\u001b[K\u001b[33;1HChecksum: 13813\u001b[K",
+      "time": 2265
+    },
+    {
+      "data": "\u001b[3;1HProgress  28% [##############....................................]\u001b[8;1H  28    1310ms  \u001b[33masserting  \u001b[0m  checkpoint 028 wrote  196 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  28 / 100 at 1310ms\u001b[K\u001b[33;1HChecksum: 21732\u001b[K",
+      "time": 2310
+    },
+    {
+      "data": "\u001b[3;1HProgress  29% [##############....................................]\u001b[9;1H  29    1355ms  \u001b[32mcomplete   \u001b[0m  checkpoint 029 wrote  203 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  29 / 100 at 1355ms\u001b[K\u001b[33;1HChecksum: 29651\u001b[K",
+      "time": 2355
+    },
+    {
+      "data": "\u001b[3;1HProgress  30% [###############...................................]\u001b[10;1H  30    1400ms  \u001b[37mqueued     \u001b[0m  checkpoint 030 wrote  210 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  30 / 100 at 1400ms\u001b[K\u001b[33;1HChecksum: 37570\u001b[K",
+      "time": 2400
+    },
+    {
+      "data": "\u001b[3;1HProgress  31% [################..................................]\u001b[11;1H  31    1445ms  \u001b[37mrunning    \u001b[0m  checkpoint 031 wrote  217 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  31 / 100 at 1445ms\u001b[K\u001b[33;1HChecksum: 45489\u001b[K",
+      "time": 2445
+    },
+    {
+      "data": "\u001b[3;1HProgress  32% [################..................................]\u001b[12;1H  32    1490ms  \u001b[36mwaiting    \u001b[0m  checkpoint 032 wrote  224 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  32 / 100 at 1490ms\u001b[K\u001b[33;1HChecksum: 53408\u001b[K",
+      "time": 2490
+    },
+    {
+      "data": "\u001b[3;1HProgress  33% [#################.................................]\u001b[13;1H  33    1535ms  \u001b[33masserting  \u001b[0m  checkpoint 033 wrote  231 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  33 / 100 at 1535ms\u001b[K\u001b[33;1HChecksum: 61327\u001b[K",
+      "time": 2535
+    },
+    {
+      "data": "\u001b[3;1HProgress  34% [#################.................................]\u001b[14;1H  34    1580ms  \u001b[32mcomplete   \u001b[0m  checkpoint 034 wrote  238 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  34 / 100 at 1580ms\u001b[K\u001b[33;1HChecksum: 69246\u001b[K",
+      "time": 2580
+    },
+    {
+      "data": "\u001b[3;1HProgress  35% [##################................................]\u001b[15;1H  35    1625ms  \u001b[37mqueued     \u001b[0m  checkpoint 035 wrote  245 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  35 / 100 at 1625ms\u001b[K\u001b[33;1HChecksum: 77165\u001b[K",
+      "time": 2625
+    },
+    {
+      "data": "\u001b[3;1HProgress  36% [##################................................]\u001b[16;1H  36    1670ms  \u001b[37mrunning    \u001b[0m  checkpoint 036 wrote  252 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  36 / 100 at 1670ms\u001b[K\u001b[33;1HChecksum: 85084\u001b[K",
+      "time": 2670
+    },
+    {
+      "data": "\u001b[3;1HProgress  37% [###################...............................]\u001b[17;1H  37    1715ms  \u001b[36mwaiting    \u001b[0m  checkpoint 037 wrote  259 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  37 / 100 at 1715ms\u001b[K\u001b[33;1HChecksum: 93003\u001b[K",
+      "time": 2715
+    },
+    {
+      "data": "\u001b[3;1HProgress  38% [###################...............................]\u001b[18;1H  38    1760ms  \u001b[33masserting  \u001b[0m  checkpoint 038 wrote  266 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  38 / 100 at 1760ms\u001b[K\u001b[33;1HChecksum: 00922\u001b[K",
+      "time": 2760
+    },
+    {
+      "data": "\u001b[3;1HProgress  39% [####################..............................]\u001b[19;1H  39    1805ms  \u001b[32mcomplete   \u001b[0m  checkpoint 039 wrote  273 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  39 / 100 at 1805ms\u001b[K\u001b[33;1HChecksum: 08841\u001b[K",
+      "time": 2805
+    },
+    {
+      "data": "\u001b[3;1HProgress  40% [####################..............................]\u001b[20;1H  40    1850ms  \u001b[37mqueued     \u001b[0m  checkpoint 040 wrote  280 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  40 / 100 at 1850ms\u001b[K\u001b[33;1HChecksum: 16760\u001b[K",
+      "time": 2850
+    },
+    {
+      "data": "\u001b[3;1HProgress  41% [#####################.............................]\u001b[21;1H  41    1895ms  \u001b[37mrunning    \u001b[0m  checkpoint 041 wrote  287 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  41 / 100 at 1895ms\u001b[K\u001b[33;1HChecksum: 24679\u001b[K",
+      "time": 2895
+    },
+    {
+      "data": "\u001b[3;1HProgress  42% [#####################.............................]\u001b[22;1H  42    1940ms  \u001b[36mwaiting    \u001b[0m  checkpoint 042 wrote  294 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  42 / 100 at 1940ms\u001b[K\u001b[33;1HChecksum: 32598\u001b[K",
+      "time": 2940
+    },
+    {
+      "data": "\u001b[3;1HProgress  43% [######################............................]\u001b[23;1H  43    1985ms  \u001b[33masserting  \u001b[0m  checkpoint 043 wrote  301 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  43 / 100 at 1985ms\u001b[K\u001b[33;1HChecksum: 40517\u001b[K",
+      "time": 2985
+    },
+    {
+      "data": "\u001b[3;1HProgress  44% [######################............................]\u001b[24;1H  44    2030ms  \u001b[32mcomplete   \u001b[0m  checkpoint 044 wrote  308 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  44 / 100 at 2030ms\u001b[K\u001b[33;1HChecksum: 48436\u001b[K",
+      "time": 3030
+    },
+    {
+      "data": "\u001b[3;1HProgress  45% [#######################...........................]\u001b[25;1H  45    2075ms  \u001b[37mqueued     \u001b[0m  checkpoint 045 wrote  315 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  45 / 100 at 2075ms\u001b[K\u001b[33;1HChecksum: 56355\u001b[K",
+      "time": 3075
+    },
+    {
+      "data": "\u001b[3;1HProgress  46% [#######################...........................]\u001b[26;1H  46    2120ms  \u001b[37mrunning    \u001b[0m  checkpoint 046 wrote  322 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  46 / 100 at 2120ms\u001b[K\u001b[33;1HChecksum: 64274\u001b[K",
+      "time": 3120
+    },
+    {
+      "data": "\u001b[3;1HProgress  47% [########################..........................]\u001b[27;1H  47    2165ms  \u001b[36mwaiting    \u001b[0m  checkpoint 047 wrote  329 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  47 / 100 at 2165ms\u001b[K\u001b[33;1HChecksum: 72193\u001b[K",
+      "time": 3165
+    },
+    {
+      "data": "\u001b[3;1HProgress  48% [########################..........................]\u001b[28;1H  48    2210ms  \u001b[33masserting  \u001b[0m  checkpoint 048 wrote  336 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  48 / 100 at 2210ms\u001b[K\u001b[33;1HChecksum: 80112\u001b[K",
+      "time": 3210
+    },
+    {
+      "data": "\u001b[3;1HProgress  49% [#########################.........................]\u001b[29;1H  49    2255ms  \u001b[32mcomplete   \u001b[0m  checkpoint 049 wrote  343 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  49 / 100 at 2255ms\u001b[K\u001b[33;1HChecksum: 88031\u001b[K",
+      "time": 3255
+    },
+    {
+      "data": "\u001b[3;1HProgress  50% [#########################.........................]\u001b[30;1H  50    2300ms  \u001b[37mqueued     \u001b[0m  checkpoint 050 wrote  350 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  50 / 100 at 2300ms\u001b[K\u001b[33;1HChecksum: 95950\u001b[K",
+      "time": 3300
+    },
+    {
+      "data": "\u001b[3;1HProgress  51% [##########################........................]\u001b[6;1H  51    2345ms  \u001b[37mrunning    \u001b[0m  checkpoint 051 wrote  357 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  51 / 100 at 2345ms\u001b[K\u001b[33;1HChecksum: 03869\u001b[K",
+      "time": 3345
+    },
+    {
+      "data": "\u001b[3;1HProgress  52% [##########################........................]\u001b[7;1H  52    2390ms  \u001b[36mwaiting    \u001b[0m  checkpoint 052 wrote  364 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  52 / 100 at 2390ms\u001b[K\u001b[33;1HChecksum: 11788\u001b[K",
+      "time": 3390
+    },
+    {
+      "data": "\u001b[3;1HProgress  53% [###########################.......................]\u001b[8;1H  53    2435ms  \u001b[33masserting  \u001b[0m  checkpoint 053 wrote  371 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  53 / 100 at 2435ms\u001b[K\u001b[33;1HChecksum: 19707\u001b[K",
+      "time": 3435
+    },
+    {
+      "data": "\u001b[3;1HProgress  54% [###########################.......................]\u001b[9;1H  54    2480ms  \u001b[32mcomplete   \u001b[0m  checkpoint 054 wrote  378 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  54 / 100 at 2480ms\u001b[K\u001b[33;1HChecksum: 27626\u001b[K",
+      "time": 3480
+    },
+    {
+      "data": "\u001b[3;1HProgress  55% [############################......................]\u001b[10;1H  55    2525ms  \u001b[37mqueued     \u001b[0m  checkpoint 055 wrote  385 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  55 / 100 at 2525ms\u001b[K\u001b[33;1HChecksum: 35545\u001b[K",
+      "time": 3525
+    },
+    {
+      "data": "\u001b[3;1HProgress  56% [############################......................]\u001b[11;1H  56    2570ms  \u001b[37mrunning    \u001b[0m  checkpoint 056 wrote  392 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  56 / 100 at 2570ms\u001b[K\u001b[33;1HChecksum: 43464\u001b[K",
+      "time": 3570
+    },
+    {
+      "data": "\u001b[3;1HProgress  57% [############################......................]\u001b[12;1H  57    2615ms  \u001b[36mwaiting    \u001b[0m  checkpoint 057 wrote  399 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  57 / 100 at 2615ms\u001b[K\u001b[33;1HChecksum: 51383\u001b[K",
+      "time": 3615
+    },
+    {
+      "data": "\u001b[3;1HProgress  58% [#############################.....................]\u001b[13;1H  58    2660ms  \u001b[33masserting  \u001b[0m  checkpoint 058 wrote  406 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  58 / 100 at 2660ms\u001b[K\u001b[33;1HChecksum: 59302\u001b[K",
+      "time": 3660
+    },
+    {
+      "data": "\u001b[3;1HProgress  59% [##############################....................]\u001b[14;1H  59    2705ms  \u001b[32mcomplete   \u001b[0m  checkpoint 059 wrote  413 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  59 / 100 at 2705ms\u001b[K\u001b[33;1HChecksum: 67221\u001b[K",
+      "time": 3705
+    },
+    {
+      "data": "\u001b[3;1HProgress  60% [##############################....................]\u001b[15;1H  60    2750ms  \u001b[37mqueued     \u001b[0m  checkpoint 060 wrote  420 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  60 / 100 at 2750ms\u001b[K\u001b[33;1HChecksum: 75140\u001b[K",
+      "time": 3750
+    },
+    {
+      "data": "\u001b[3;1HProgress  61% [###############################...................]\u001b[16;1H  61    2795ms  \u001b[37mrunning    \u001b[0m  checkpoint 061 wrote  427 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  61 / 100 at 2795ms\u001b[K\u001b[33;1HChecksum: 83059\u001b[K",
+      "time": 3795
+    },
+    {
+      "data": "\u001b[3;1HProgress  62% [###############################...................]\u001b[17;1H  62    2840ms  \u001b[36mwaiting    \u001b[0m  checkpoint 062 wrote  434 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  62 / 100 at 2840ms\u001b[K\u001b[33;1HChecksum: 90978\u001b[K",
+      "time": 3840
+    },
+    {
+      "data": "\u001b[3;1HProgress  63% [################################..................]\u001b[18;1H  63    2885ms  \u001b[33masserting  \u001b[0m  checkpoint 063 wrote  441 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  63 / 100 at 2885ms\u001b[K\u001b[33;1HChecksum: 98897\u001b[K",
+      "time": 3885
+    },
+    {
+      "data": "\u001b[3;1HProgress  64% [################################..................]\u001b[19;1H  64    2930ms  \u001b[32mcomplete   \u001b[0m  checkpoint 064 wrote  448 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  64 / 100 at 2930ms\u001b[K\u001b[33;1HChecksum: 06816\u001b[K",
+      "time": 3930
+    },
+    {
+      "data": "\u001b[3;1HProgress  65% [#################################.................]\u001b[20;1H  65    2975ms  \u001b[37mqueued     \u001b[0m  checkpoint 065 wrote  455 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  65 / 100 at 2975ms\u001b[K\u001b[33;1HChecksum: 14735\u001b[K",
+      "time": 3975
+    },
+    {
+      "data": "\u001b[3;1HProgress  66% [#################################.................]\u001b[21;1H  66    3020ms  \u001b[37mrunning    \u001b[0m  checkpoint 066 wrote  462 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  66 / 100 at 3020ms\u001b[K\u001b[33;1HChecksum: 22654\u001b[K",
+      "time": 4020
+    },
+    {
+      "data": "\u001b[3;1HProgress  67% [##################################................]\u001b[22;1H  67    3065ms  \u001b[36mwaiting    \u001b[0m  checkpoint 067 wrote  469 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  67 / 100 at 3065ms\u001b[K\u001b[33;1HChecksum: 30573\u001b[K",
+      "time": 4065
+    },
+    {
+      "data": "\u001b[3;1HProgress  68% [##################################................]\u001b[23;1H  68    3110ms  \u001b[33masserting  \u001b[0m  checkpoint 068 wrote  476 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  68 / 100 at 3110ms\u001b[K\u001b[33;1HChecksum: 38492\u001b[K",
+      "time": 4110
+    },
+    {
+      "data": "\u001b[3;1HProgress  69% [###################################...............]\u001b[24;1H  69    3155ms  \u001b[32mcomplete   \u001b[0m  checkpoint 069 wrote  483 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  69 / 100 at 3155ms\u001b[K\u001b[33;1HChecksum: 46411\u001b[K",
+      "time": 4155
+    },
+    {
+      "data": "\u001b[3;1HProgress  70% [###################################...............]\u001b[25;1H  70    3200ms  \u001b[37mqueued     \u001b[0m  checkpoint 070 wrote  490 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  70 / 100 at 3200ms\u001b[K\u001b[33;1HChecksum: 54330\u001b[K",
+      "time": 4200
+    },
+    {
+      "data": "\u001b[3;1HProgress  71% [####################################..............]\u001b[26;1H  71    3245ms  \u001b[37mrunning    \u001b[0m  checkpoint 071 wrote  497 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  71 / 100 at 3245ms\u001b[K\u001b[33;1HChecksum: 62249\u001b[K",
+      "time": 4245
+    },
+    {
+      "data": "\u001b[3;1HProgress  72% [####################################..............]\u001b[27;1H  72    3290ms  \u001b[36mwaiting    \u001b[0m  checkpoint 072 wrote  504 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  72 / 100 at 3290ms\u001b[K\u001b[33;1HChecksum: 70168\u001b[K",
+      "time": 4290
+    },
+    {
+      "data": "\u001b[3;1HProgress  73% [#####################################.............]\u001b[28;1H  73    3335ms  \u001b[33masserting  \u001b[0m  checkpoint 073 wrote  511 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  73 / 100 at 3335ms\u001b[K\u001b[33;1HChecksum: 78087\u001b[K",
+      "time": 4335
+    },
+    {
+      "data": "\u001b[3;1HProgress  74% [#####################################.............]\u001b[29;1H  74    3380ms  \u001b[32mcomplete   \u001b[0m  checkpoint 074 wrote  518 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  74 / 100 at 3380ms\u001b[K\u001b[33;1HChecksum: 86006\u001b[K",
+      "time": 4380
+    },
+    {
+      "data": "\u001b[3;1HProgress  75% [######################################............]\u001b[30;1H  75    3425ms  \u001b[37mqueued     \u001b[0m  checkpoint 075 wrote  525 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  75 / 100 at 3425ms\u001b[K\u001b[33;1HChecksum: 93925\u001b[K",
+      "time": 4425
+    },
+    {
+      "data": "\u001b[3;1HProgress  76% [######################################............]\u001b[6;1H  76    3470ms  \u001b[37mrunning    \u001b[0m  checkpoint 076 wrote  532 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  76 / 100 at 3470ms\u001b[K\u001b[33;1HChecksum: 01844\u001b[K",
+      "time": 4470
+    },
+    {
+      "data": "\u001b[3;1HProgress  77% [#######################################...........]\u001b[7;1H  77    3515ms  \u001b[36mwaiting    \u001b[0m  checkpoint 077 wrote  539 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  77 / 100 at 3515ms\u001b[K\u001b[33;1HChecksum: 09763\u001b[K",
+      "time": 4515
+    },
+    {
+      "data": "\u001b[3;1HProgress  78% [#######################################...........]\u001b[8;1H  78    3560ms  \u001b[33masserting  \u001b[0m  checkpoint 078 wrote  546 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  78 / 100 at 3560ms\u001b[K\u001b[33;1HChecksum: 17682\u001b[K",
+      "time": 4560
+    },
+    {
+      "data": "\u001b[3;1HProgress  79% [########################################..........]\u001b[9;1H  79    3605ms  \u001b[32mcomplete   \u001b[0m  checkpoint 079 wrote  553 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  79 / 100 at 3605ms\u001b[K\u001b[33;1HChecksum: 25601\u001b[K",
+      "time": 4605
+    },
+    {
+      "data": "\u001b[3;1HProgress  80% [########################################..........]\u001b[10;1H  80    3650ms  \u001b[37mqueued     \u001b[0m  checkpoint 080 wrote  560 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  80 / 100 at 3650ms\u001b[K\u001b[33;1HChecksum: 33520\u001b[K",
+      "time": 4650
+    },
+    {
+      "data": "\u001b[3;1HProgress  81% [#########################################.........]\u001b[11;1H  81    3695ms  \u001b[37mrunning    \u001b[0m  checkpoint 081 wrote  567 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  81 / 100 at 3695ms\u001b[K\u001b[33;1HChecksum: 41439\u001b[K",
+      "time": 4695
+    },
+    {
+      "data": "\u001b[3;1HProgress  82% [#########################################.........]\u001b[12;1H  82    3740ms  \u001b[36mwaiting    \u001b[0m  checkpoint 082 wrote  574 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  82 / 100 at 3740ms\u001b[K\u001b[33;1HChecksum: 49358\u001b[K",
+      "time": 4740
+    },
+    {
+      "data": "\u001b[3;1HProgress  83% [##########################################........]\u001b[13;1H  83    3785ms  \u001b[33masserting  \u001b[0m  checkpoint 083 wrote  581 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  83 / 100 at 3785ms\u001b[K\u001b[33;1HChecksum: 57277\u001b[K",
+      "time": 4785
+    },
+    {
+      "data": "\u001b[3;1HProgress  84% [##########################################........]\u001b[14;1H  84    3830ms  \u001b[32mcomplete   \u001b[0m  checkpoint 084 wrote  588 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  84 / 100 at 3830ms\u001b[K\u001b[33;1HChecksum: 65196\u001b[K",
+      "time": 4830
+    },
+    {
+      "data": "\u001b[3;1HProgress  85% [###########################################.......]\u001b[15;1H  85    3875ms  \u001b[37mqueued     \u001b[0m  checkpoint 085 wrote  595 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  85 / 100 at 3875ms\u001b[K\u001b[33;1HChecksum: 73115\u001b[K",
+      "time": 4875
+    },
+    {
+      "data": "\u001b[3;1HProgress  86% [###########################################.......]\u001b[16;1H  86    3920ms  \u001b[37mrunning    \u001b[0m  checkpoint 086 wrote  602 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  86 / 100 at 3920ms\u001b[K\u001b[33;1HChecksum: 81034\u001b[K",
+      "time": 4920
+    },
+    {
+      "data": "\u001b[3;1HProgress  87% [############################################......]\u001b[17;1H  87    3965ms  \u001b[36mwaiting    \u001b[0m  checkpoint 087 wrote  609 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  87 / 100 at 3965ms\u001b[K\u001b[33;1HChecksum: 88953\u001b[K",
+      "time": 4965
+    },
+    {
+      "data": "\u001b[3;1HProgress  88% [############################################......]\u001b[18;1H  88    4010ms  \u001b[33masserting  \u001b[0m  checkpoint 088 wrote  616 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  88 / 100 at 4010ms\u001b[K\u001b[33;1HChecksum: 96872\u001b[K",
+      "time": 5010
+    },
+    {
+      "data": "\u001b[3;1HProgress  89% [#############################################.....]\u001b[19;1H  89    4055ms  \u001b[32mcomplete   \u001b[0m  checkpoint 089 wrote  623 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  89 / 100 at 4055ms\u001b[K\u001b[33;1HChecksum: 04791\u001b[K",
+      "time": 5055
+    },
+    {
+      "data": "\u001b[3;1HProgress  90% [#############################################.....]\u001b[20;1H  90    4100ms  \u001b[37mqueued     \u001b[0m  checkpoint 090 wrote  630 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  90 / 100 at 4100ms\u001b[K\u001b[33;1HChecksum: 12710\u001b[K",
+      "time": 5100
+    },
+    {
+      "data": "\u001b[3;1HProgress  91% [##############################################....]\u001b[21;1H  91    4145ms  \u001b[37mrunning    \u001b[0m  checkpoint 091 wrote  637 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step:  91 / 100 at 4145ms\u001b[K\u001b[33;1HChecksum: 20629\u001b[K",
+      "time": 5145
+    },
+    {
+      "data": "\u001b[3;1HProgress  92% [##############################################....]\u001b[22;1H  92    4190ms  \u001b[36mwaiting    \u001b[0m  checkpoint 092 wrote  644 cells and verified  3 assertions\u001b[K\u001b[32;1HLast step:  92 / 100 at 4190ms\u001b[K\u001b[33;1HChecksum: 28548\u001b[K",
+      "time": 5190
+    },
+    {
+      "data": "\u001b[3;1HProgress  93% [###############################################...]\u001b[23;1H  93    4235ms  \u001b[33masserting  \u001b[0m  checkpoint 093 wrote  651 cells and verified  4 assertions\u001b[K\u001b[32;1HLast step:  93 / 100 at 4235ms\u001b[K\u001b[33;1HChecksum: 36467\u001b[K",
+      "time": 5235
+    },
+    {
+      "data": "\u001b[3;1HProgress  94% [###############################################...]\u001b[24;1H  94    4280ms  \u001b[32mcomplete   \u001b[0m  checkpoint 094 wrote  658 cells and verified  5 assertions\u001b[K\u001b[32;1HLast step:  94 / 100 at 4280ms\u001b[K\u001b[33;1HChecksum: 44386\u001b[K",
+      "time": 5280
+    },
+    {
+      "data": "\u001b[3;1HProgress  95% [################################################..]\u001b[25;1H  95    4325ms  \u001b[37mqueued     \u001b[0m  checkpoint 095 wrote  665 cells and verified  6 assertions\u001b[K\u001b[32;1HLast step:  95 / 100 at 4325ms\u001b[K\u001b[33;1HChecksum: 52305\u001b[K",
+      "time": 5325
+    },
+    {
+      "data": "\u001b[3;1HProgress  96% [################################################..]\u001b[26;1H  96    4370ms  \u001b[37mrunning    \u001b[0m  checkpoint 096 wrote  672 cells and verified  7 assertions\u001b[K\u001b[32;1HLast step:  96 / 100 at 4370ms\u001b[K\u001b[33;1HChecksum: 60224\u001b[K",
+      "time": 5370
+    },
+    {
+      "data": "\u001b[3;1HProgress  97% [#################################################.]\u001b[27;1H  97    4415ms  \u001b[36mwaiting    \u001b[0m  checkpoint 097 wrote  679 cells and verified  8 assertions\u001b[K\u001b[32;1HLast step:  97 / 100 at 4415ms\u001b[K\u001b[33;1HChecksum: 68143\u001b[K",
+      "time": 5415
+    },
+    {
+      "data": "\u001b[3;1HProgress  98% [#################################################.]\u001b[28;1H  98    4460ms  \u001b[33masserting  \u001b[0m  checkpoint 098 wrote  686 cells and verified  9 assertions\u001b[K\u001b[32;1HLast step:  98 / 100 at 4460ms\u001b[K\u001b[33;1HChecksum: 76062\u001b[K",
+      "time": 5460
+    },
+    {
+      "data": "\u001b[3;1HProgress  99% [##################################################]\u001b[29;1H  99    4505ms  \u001b[32mcomplete   \u001b[0m  checkpoint 099 wrote  693 cells and verified  1 assertions\u001b[K\u001b[32;1HLast step:  99 / 100 at 4505ms\u001b[K\u001b[33;1HChecksum: 83981\u001b[K",
+      "time": 5505
+    },
+    {
+      "data": "\u001b[3;1HProgress 100% [##################################################]\u001b[30;1H 100    4550ms  \u001b[37mqueued     \u001b[0m  checkpoint 100 wrote  700 cells and verified  2 assertions\u001b[K\u001b[32;1HLast step: 100 / 100 at 4550ms\u001b[K\u001b[33;1HChecksum: 91900\u001b[K",
+      "time": 5550
+    }
+  ],
+  "testPath": [
+    "examples",
+    "large-100-steps.tui.test.ts",
+    "1",
+    "1"
+  ],
+  "testName": [
+    "large 100 step trace"
+  ],
+  "attempt": 0
+}

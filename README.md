@@ -389,6 +389,7 @@ npm run tui -- examples/simple.tui-trace.json --project .
 npm run gif -- examples/simple.tui-trace.json --output simple.gif
 npm run video -- examples/simple.tui-trace.json --output simple.mp4
 npm run benchmark
+npm run benchmark -- --trace examples/small-20-frames.tui-trace.json
 ```
 
 ### Benchmarks
@@ -396,15 +397,19 @@ npm run benchmark
 ```bash
 npm run benchmark
 npm run benchmark -- --trace examples/simple.tui-trace.json --iterations 50 --gif-iterations 10
+npm run benchmark -- --trace examples/small-20-frames.tui-trace.json --iterations 10 --gif-iterations 2
+npm run benchmark -- --trace examples/large-100-steps.tui-trace.json --iterations 1 --gif-iterations 0
 ```
 
 The benchmark harness measures trace loading/render preparation, terminal pixel rendering with and without annotation overlays, and GIF export with and without annotation overlays. By default it copies the selected trace to a temporary directory and writes a synthetic annotation sidecar so overlay costs are measured without mutating the source trace. Use `--no-synthetic-annotation` to benchmark the trace exactly as-is.
+
+The repo includes `examples/small-20-frames.tui-trace.json`, a compact trace that renders exactly 20 frames for fast benchmark runs. It also includes `examples/large-100-steps.tui-trace.json`, a deterministic 120-column trace with 100 update steps for heavier render and media export stress testing.
 
 | Option | Default | Description |
 | --- | --- | --- |
 | `--trace <file>` | `examples/simple.tui-trace.json` | Trace file to benchmark. |
 | `--iterations <count>` | `25` | Iterations for load and frame-render benchmarks. |
-| `--gif-iterations <count>` | `5` | Iterations for full GIF export benchmarks. |
+| `--gif-iterations <count>` | `5` | Iterations for full GIF export benchmarks. Use `0` to skip GIF export. |
 | `--no-synthetic-annotation` | Disabled | Do not create a temporary annotation sidecar. |
 
 Project layout:

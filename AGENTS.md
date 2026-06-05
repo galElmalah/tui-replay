@@ -18,6 +18,7 @@ npm run preview -- examples/simple.tui-trace.json --project . --no-open
 npm run tui -- examples/simple.tui-trace.json --project .
 npm run gif -- examples/simple.tui-trace.json --output /tmp/tui-replay.gif --overlay
 npm run video -- examples/simple.tui-trace.json --output /tmp/tui-replay.mp4 --overlay
+npm run benchmark -- --trace examples/small-20-frames.tui-trace.json --iterations 5 --gif-iterations 1
 ```
 
 The video command requires `ffmpeg` on `PATH`, `TUI_REPLAY_FFMPEG`, `FFMPEG_PATH`, `FFMPEG_BIN`, or `--ffmpeg-path`.

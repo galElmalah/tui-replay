@@ -46,6 +46,7 @@
   "files": [
     "dist",
     "docs/screenshots",
+    "examples",
     "README.md",
     "AGENTS.md"
   ],

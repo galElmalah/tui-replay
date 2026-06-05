@@ -89,26 +89,28 @@ try {
       "frames"
     )
   );
-  results.push(
-    await benchmark("gif export, no overlay", options.gifIterations, async (iteration) => {
-      await exportTerminalGif({
-        ...baseRenderOptions,
-        output: path.join(outputDir, `plain-${iteration}.gif`),
-        overlay: false,
-        repeat: -1
-      });
-    })
-  );
-  results.push(
-    await benchmark("gif export, annotation overlay", options.gifIterations, async (iteration) => {
-      await exportTerminalGif({
-        ...baseRenderOptions,
-        output: path.join(outputDir, `overlay-${iteration}.gif`),
-        overlay: { position: "bottom-right" },
-        repeat: -1
-      });
-    })
-  );
+  if (options.gifIterations > 0) {
+    results.push(
+      await benchmark("gif export, no overlay", options.gifIterations, async (iteration) => {
+        await exportTerminalGif({
+          ...baseRenderOptions,
+          output: path.join(outputDir, `plain-${iteration}.gif`),
+          overlay: false,
+          repeat: -1
+        });
+      })
+    );
+    results.push(
+      await benchmark("gif export, annotation overlay", options.gifIterations, async (iteration) => {
+        await exportTerminalGif({
+          ...baseRenderOptions,
+          output: path.join(outputDir, `overlay-${iteration}.gif`),
+          overlay: { position: "bottom-right" },
+          repeat: -1
+        });
+      })
+    );
+  }
 
   printResults(results);
 } finally {
@@ -202,7 +204,7 @@ function parseArgs(args: string[]): BenchmarkOptions {
         parsed.iterations = parsePositiveInteger(requiredValue(args, ++index, arg), arg);
         break;
       case "--gif-iterations":
-        parsed.gifIterations = parsePositiveInteger(requiredValue(args, ++index, arg), arg);
+        parsed.gifIterations = parseNonNegativeInteger(requiredValue(args, ++index, arg), arg);
         break;
       case "--no-synthetic-annotation":
         parsed.syntheticAnnotation = false;
@@ -235,12 +237,20 @@ function parsePositiveInteger(value: string, flag: string): number {
   return parsed;
 }
 
+function parseNonNegativeInteger(value: string, flag: string): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 0) {
+    throw new Error(`${flag} must be a non-negative integer`);
+  }
+  return parsed;
+}
+
 function printHelpAndExit(): never {
   process.stdout.write(`Usage: npm run benchmark -- [options]\n\n`);
   process.stdout.write(`Options:\n`);
   process.stdout.write(`  --trace <file>                Trace file to benchmark. Default: examples/simple.tui-trace.json\n`);
   process.stdout.write(`  --iterations <count>          Render benchmark iterations. Default: 25\n`);
-  process.stdout.write(`  --gif-iterations <count>      GIF export benchmark iterations. Default: 5\n`);
+  process.stdout.write(`  --gif-iterations <count>      GIF export benchmark iterations; 0 skips GIF export. Default: 5\n`);
   process.stdout.write(`  --no-synthetic-annotation     Do not create a temporary annotation sidecar for overlay benchmarks.\n`);
   process.stdout.write(`  -h, --help                    Show help.\n`);
   process.exit(0);
