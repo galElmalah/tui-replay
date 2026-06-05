@@ -22,7 +22,7 @@ TUI Replay is a TypeScript CLI package that reads `tui-test` trace files, recons
 - Render terminal cell colors and cursor state through `@xterm/headless`.
 - Watch trace files and directories so newly written test traces appear without restarting the server.
 - Export animated GIF, MP4, or WebM media of the terminal surface only.
-- Generate GIF frames with duplicate-frame compaction, explicit font-file loading, and optional worker parallelism.
+- Generate GIF frames with row-delta rendering, duplicate-frame compaction, explicit font-file loading, and optional worker parallelism.
 - Add optional media overlays showing `Frame x / y` and the current replay timestamp.
 - Show source context from the test file, including nearby `assert`, `expect`, and snapshot calls when available.
 - Add sidecar annotations for events such as OAuth, user actions, policy decisions, or checkpoints.
@@ -424,7 +424,7 @@ npm run benchmark -- --trace examples/small-20-frames.tui-trace.json --iteration
 npm run benchmark -- --trace examples/large-100-steps.tui-trace.json --iterations 1 --gif-iterations 0
 ```
 
-The benchmark harness measures trace loading/render preparation, terminal pixel rendering with and without annotation overlays, and GIF export in both optimized single-worker and parallel-worker modes. By default it copies the selected trace to a temporary directory and writes a synthetic annotation sidecar so overlay costs are measured without mutating the source trace. Use `--no-synthetic-annotation` to benchmark the trace exactly as-is.
+The benchmark harness measures trace loading/render preparation, terminal pixel rendering with and without annotation overlays, row-delta GIF export without overlays, and parallel GIF export with annotation overlays. By default it copies the selected trace to a temporary directory and writes a synthetic annotation sidecar so overlay costs are measured without mutating the source trace. Use `--no-synthetic-annotation` to benchmark the trace exactly as-is.
 
 The repo includes `examples/small-20-frames.tui-trace.json`, a compact trace that renders exactly 20 frames for fast benchmark runs. It also includes `examples/large-100-steps.tui-trace.json`, a deterministic 120-column trace with 100 update steps for heavier render and media export stress testing.
 

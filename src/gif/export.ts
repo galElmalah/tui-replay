@@ -7,6 +7,7 @@ import {
   defaultTerminalOutputPath,
   loadTerminalRenderSource,
   renderTerminalFramePixels,
+  renderTerminalFrameRowsPixels,
   terminalFrameDelay,
   type TerminalOverlayOptions,
   type TerminalOverlayPosition,
@@ -39,8 +40,11 @@ export async function exportTerminalGif(options: ExportTerminalGifOptions): Prom
   const source = await loadTerminalRenderSource(options);
   const outputPath = path.resolve(options.output ?? defaultTerminalOutputPath(source.tracePath, "gif"));
   const encoder = gifenc.GIFEncoder({ initialCapacity: source.metrics.width * source.metrics.height });
-  const workerCount = resolveGifWorkerCount(options.workers, source.frames.length);
-  const frames = await prepareGifFrames(source.frames, source.metrics, source.annotations, options, workerCount);
+  const useRowDeltas = canUseRowDeltas(source.metrics);
+  const workerCount = useRowDeltas ? 1 : resolveGifWorkerCount(options.workers, source.frames.length);
+  const frames = useRowDeltas
+    ? prepareGifFramesWithRowDeltas(source.frames, source.metrics, options)
+    : await prepareGifFrames(source.frames, source.metrics, source.annotations, options, workerCount);
 
   for (const frame of frames) {
     encoder.writeFrame(frame.indexed, source.metrics.width, source.metrics.height, {
@@ -123,9 +127,50 @@ async function prepareGifFrames(
 
 function prepareGifFrame(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]): Omit<PreparedGifFrame, "delay" | "signature"> {
   const pixels = renderTerminalFramePixels(frame, metrics, annotations);
+  return prepareGifFramePixels(pixels);
+}
+
+function prepareGifFramePixels(pixels: Uint8Array): Omit<PreparedGifFrame, "delay" | "signature"> {
   const palette = gifenc.quantize(pixels, 256, { format: "rgb565" });
   const indexed = gifenc.applyPalette(pixels, palette, "rgb565");
   return { indexed, palette };
+}
+
+function prepareGifFramesWithRowDeltas(
+  frames: RenderedFrame[],
+  metrics: TerminalRenderMetrics,
+  options: TerminalRenderOptions
+): PreparedGifFrame[] {
+  const prepared: PreparedGifFrame[] = [];
+  let previousPixels: Uint8Array | undefined;
+  let previousPrepared: Omit<PreparedGifFrame, "delay" | "signature"> | undefined;
+
+  for (const [index, frame] of frames.entries()) {
+    const signature = frameSurfaceSignature(frame);
+    const delay = terminalFrameDelay(frames, index, options);
+
+    if (index > 0 && prepared.at(-1)?.signature === signature && previousPrepared) {
+      prepared.push({ ...previousPrepared, delay, signature });
+      continue;
+    }
+
+    let pixels: Uint8Array;
+    if (index === 0 || !previousPixels) {
+      pixels = Uint8Array.from(renderTerminalFramePixels(frame, metrics));
+    } else {
+      pixels = Uint8Array.from(previousPixels);
+      for (const run of changedRowRuns(frame, frames[index - 1], metrics.rows)) {
+        copyRowRunPixels(pixels, renderTerminalFrameRowsPixels(frame, metrics, run.start, run.end), metrics, run.start, run.end);
+      }
+    }
+
+    const framePrepared = prepareGifFramePixels(pixels);
+    prepared.push({ ...framePrepared, delay, signature });
+    previousPixels = pixels;
+    previousPrepared = framePrepared;
+  }
+
+  return compactConsecutiveGifFrames(prepared);
 }
 
 type GifFrameTask = {
@@ -299,31 +344,87 @@ function compactConsecutiveGifFrames(frames: PreparedGifFrame[]): PreparedGifFra
   return compacted;
 }
 
+type ChangedRowRun = {
+  start: number;
+  end: number;
+};
+
+function changedRowRuns(frame: RenderedFrame, previousFrame: RenderedFrame, rowCount: number): ChangedRowRun[] {
+  const runs: ChangedRowRun[] = [];
+  let start = -1;
+
+  for (let row = 0; row < rowCount; row += 1) {
+    const changed = rowSignature(frame.lines[row] ?? [{ text: " " }]) !== rowSignature(previousFrame.lines[row] ?? [{ text: " " }]);
+    if (changed && start < 0) {
+      start = row;
+    }
+    if ((!changed || row === frame.rows - 1) && start >= 0) {
+      runs.push({
+        start,
+        end: changed && row === frame.rows - 1 ? row + 1 : row
+      });
+      start = -1;
+    }
+  }
+
+  return runs;
+}
+
+function copyRowRunPixels(target: Uint8Array, source: Uint8Array, metrics: TerminalRenderMetrics, rowStart: number, rowEnd: number): void {
+  const y = metrics.padding + rowStart * metrics.lineHeight;
+  const height = Math.ceil((rowEnd - rowStart) * metrics.lineHeight);
+  const rowBytes = metrics.width * 4;
+
+  for (let row = 0; row < height; row += 1) {
+    const targetStart = (y + row) * rowBytes;
+    const sourceStart = row * rowBytes;
+    target.set(source.subarray(sourceStart, sourceStart + rowBytes), targetStart);
+  }
+}
+
 function frameSurfaceSignature(frame: RenderedFrame): string {
   const parts = [`${frame.rows}x${frame.cols}`];
 
   for (const row of frame.lines) {
     parts.push("\n");
-    for (const segment of row) {
-      parts.push(
-        segment.text,
-        "\u0001",
-        segment.fg ?? "",
-        "\u0001",
-        segment.bg ?? "",
-        "\u0001",
-        segment.bold ? "1" : "0",
-        segment.dim ? "1" : "0",
-        segment.italic ? "1" : "0",
-        segment.underline ? "1" : "0",
-        segment.inverse ? "1" : "0",
-        segment.cursor ? "1" : "0",
-        "\u0002"
-      );
-    }
+    parts.push(rowSignature(row));
   }
 
   return parts.join("");
+}
+
+function rowSignature(row: RenderedFrame["lines"][number]): string {
+  const parts: string[] = [];
+
+  for (const segment of row) {
+    parts.push(
+      segment.text,
+      "\u0001",
+      segment.fg ?? "",
+      "\u0001",
+      segment.bg ?? "",
+      "\u0001",
+      segment.bold ? "1" : "0",
+      segment.dim ? "1" : "0",
+      segment.italic ? "1" : "0",
+      segment.underline ? "1" : "0",
+      segment.inverse ? "1" : "0",
+      segment.cursor ? "1" : "0",
+      "\u0002"
+    );
+  }
+
+  return parts.join("");
+}
+
+function canUseRowDeltas(metrics: TerminalRenderMetrics): boolean {
+  return (
+    !metrics.overlay.enabled &&
+    Number.isInteger(metrics.width) &&
+    Number.isInteger(metrics.height) &&
+    Number.isInteger(metrics.padding) &&
+    Number.isInteger(metrics.lineHeight)
+  );
 }
 
 function resolveGifWorkerCount(requestedWorkers: number | undefined, frameCount: number): number {

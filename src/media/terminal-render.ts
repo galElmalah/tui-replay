@@ -112,6 +112,10 @@ export function renderTerminalFramePixels(frame: RenderedFrame, metrics: Termina
   return renderTerminalFrame(frame, metrics, annotations).pixels;
 }
 
+export function renderTerminalFrameRowsPixels(frame: RenderedFrame, metrics: TerminalRenderMetrics, rowStart: number, rowEnd: number): Buffer {
+  return renderSvg(terminalFrameRowsToSvg(frame, metrics, rowStart, rowEnd), metrics).pixels;
+}
+
 export function renderTerminalFrameSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[] = []): string {
   return terminalFrameToSvg(frame, metrics, annotations);
 }
@@ -134,6 +138,10 @@ export function defaultTerminalOutputPath(tracePath: string, extension: string):
 
 function renderTerminalFrame(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]) {
   const svg = renderTerminalFrameSvg(frame, metrics, annotations);
+  return renderSvg(svg, metrics);
+}
+
+function renderSvg(svg: string, metrics: TerminalRenderMetrics) {
   return new Resvg(svg, {
     font: {
       loadSystemFonts: metrics.loadSystemFonts,
@@ -154,7 +162,40 @@ function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics
     `<rect width="100%" height="100%" fill="${escapeAttribute(metrics.theme.background)}"/>`
   ];
 
-  for (let row = 0; row < metrics.rows; row += 1) {
+  appendTerminalRows(parts, frame, metrics, 0, metrics.rows, metrics.padding);
+
+  if (metrics.overlay.enabled) {
+    parts.push(renderOverlay(frame, metrics, annotations));
+  }
+
+  parts.push("</svg>");
+  return parts.join("");
+}
+
+function terminalFrameRowsToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics, rowStart: number, rowEnd: number): string {
+  const safeStart = Math.max(0, Math.min(rowStart, metrics.rows));
+  const safeEnd = Math.max(safeStart, Math.min(rowEnd, metrics.rows));
+  const height = Math.ceil((safeEnd - safeStart) * metrics.lineHeight);
+  const parts = [
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${metrics.width}" height="${height}" viewBox="0 0 ${metrics.width} ${height}">`,
+    `<rect width="100%" height="100%" fill="${escapeAttribute(metrics.theme.background)}"/>`
+  ];
+
+  appendTerminalRows(parts, frame, metrics, safeStart, safeEnd, 0);
+
+  parts.push("</svg>");
+  return parts.join("");
+}
+
+function appendTerminalRows(
+  parts: string[],
+  frame: RenderedFrame,
+  metrics: TerminalRenderMetrics,
+  rowStart: number,
+  rowEnd: number,
+  yOffset: number
+): void {
+  for (let row = rowStart; row < rowEnd; row += 1) {
     const segments = frame.lines[row] ?? [{ text: " " }];
     let col = 0;
 
@@ -162,7 +203,7 @@ function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics
       const text = segment.text || " ";
       const length = cellLength(text);
       const x = metrics.padding + col * metrics.cellWidth;
-      const y = metrics.padding + row * metrics.lineHeight;
+      const y = yOffset + (row - rowStart) * metrics.lineHeight;
       const background = segment.cursor ? metrics.theme.cursorColor : segment.bg;
 
       if (background) {
@@ -190,13 +231,6 @@ function terminalFrameToSvg(frame: RenderedFrame, metrics: TerminalRenderMetrics
       col += length;
     }
   }
-
-  if (metrics.overlay.enabled) {
-    parts.push(renderOverlay(frame, metrics, annotations));
-  }
-
-  parts.push("</svg>");
-  return parts.join("");
 }
 
 function renderOverlay(frame: RenderedFrame, metrics: TerminalRenderMetrics, annotations: ResolvedTraceAnnotation[]): string {

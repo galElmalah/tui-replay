@@ -94,24 +94,13 @@ try {
   );
   if (options.gifIterations > 0) {
     results.push(
-      await benchmark("gif export, no overlay, 1 worker", options.gifIterations, async (iteration) => {
+      await benchmark("gif export, no overlay, row deltas", options.gifIterations, async (iteration) => {
         await exportTerminalGif({
           ...baseRenderOptions,
           output: path.join(outputDir, `plain-sequential-${iteration}.gif`),
           overlay: false,
           repeat: -1,
           workers: 1
-        });
-      })
-    );
-    results.push(
-      await benchmark(`gif export, no overlay, ${gifWorkerLabel}`, options.gifIterations, async (iteration) => {
-        await exportTerminalGif({
-          ...baseRenderOptions,
-          output: path.join(outputDir, `plain-parallel-${iteration}.gif`),
-          overlay: false,
-          repeat: -1,
-          workers: options.gifWorkers
         });
       })
     );
