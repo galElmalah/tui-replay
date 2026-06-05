@@ -40,6 +40,7 @@ Whenever a command or flag changes, update the CLI reference in `README.md` in t
 
 | Path | Responsibility |
 | --- | --- |
+| `src/benchmark.ts` | Local benchmark harness for media render/export paths. |
 | `src/cli.ts` | CLI command definitions, option parsing, and command output. |
 | `src/server` | HTTP preview server, static HTML, and live reload events. |
 | `src/viewer` | Browser-side replay UI. |

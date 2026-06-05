@@ -388,12 +388,30 @@ npm run preview -- examples/simple.tui-trace.json --project .
 npm run tui -- examples/simple.tui-trace.json --project .
 npm run gif -- examples/simple.tui-trace.json --output simple.gif
 npm run video -- examples/simple.tui-trace.json --output simple.mp4
+npm run benchmark
 ```
+
+### Benchmarks
+
+```bash
+npm run benchmark
+npm run benchmark -- --trace examples/simple.tui-trace.json --iterations 50 --gif-iterations 10
+```
+
+The benchmark harness measures trace loading/render preparation, terminal pixel rendering with and without annotation overlays, and GIF export with and without annotation overlays. By default it copies the selected trace to a temporary directory and writes a synthetic annotation sidecar so overlay costs are measured without mutating the source trace. Use `--no-synthetic-annotation` to benchmark the trace exactly as-is.
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--trace <file>` | `examples/simple.tui-trace.json` | Trace file to benchmark. |
+| `--iterations <count>` | `25` | Iterations for load and frame-render benchmarks. |
+| `--gif-iterations <count>` | `5` | Iterations for full GIF export benchmarks. |
+| `--no-synthetic-annotation` | Disabled | Do not create a temporary annotation sidecar. |
 
 Project layout:
 
 | Path | Purpose |
 | --- | --- |
+| `src/benchmark.ts` | Local benchmark harness for media render/export paths. |
 | `src/cli.ts` | CLI command definitions and option parsing. |
 | `src/server` | HTTP server, static HTML, and live reload events. |
 | `src/viewer` | Browser-side replay UI. |

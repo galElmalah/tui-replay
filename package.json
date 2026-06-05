@@ -55,7 +55,8 @@
     "preview": "npm run build && node dist/cli.js preview",
     "gif": "npm run build && node dist/cli.js gif",
     "video": "npm run build && node dist/cli.js video",
-    "tui": "npm run build && node dist/cli.js tui"
+    "tui": "npm run build && node dist/cli.js tui",
+    "benchmark": "npm run build && node dist/benchmark.js"
   },
   "dependencies": {
     "@opentui/core": "^0.2.15",
