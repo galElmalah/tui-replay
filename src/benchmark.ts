@@ -12,6 +12,7 @@ type BenchmarkOptions = {
   trace: string;
   iterations: number;
   gifIterations: number;
+  gifWorkers?: number;
   syntheticAnnotation: boolean;
 };
 
@@ -42,6 +43,7 @@ try {
     overlay: { position: "bottom-right" }
   });
   const outputDir = path.join(tempRoot, "out");
+  const gifWorkerLabel = formatWorkerLabel(options.gifWorkers);
 
   process.stdout.write(`TUI Replay benchmark\n`);
   process.stdout.write(`Trace: ${trace.displayPath}\n`);
@@ -51,7 +53,8 @@ try {
   process.stdout.write(
     `Frames: ${plainSource.frames.length} | Duration: ${formatDuration(plainSource.durationMs)} | Size: ${plainSource.metrics.width}x${plainSource.metrics.height}\n`
   );
-  process.stdout.write(`Iterations: render=${options.iterations}, gif=${options.gifIterations}\n\n`);
+  process.stdout.write(`Iterations: render=${options.iterations}, gif=${options.gifIterations}\n`);
+  process.stdout.write(`GIF workers: sequential=1, parallel=${gifWorkerLabel}\n\n`);
 
   const results: BenchmarkResult[] = [];
   results.push(
@@ -91,22 +94,35 @@ try {
   );
   if (options.gifIterations > 0) {
     results.push(
-      await benchmark("gif export, no overlay", options.gifIterations, async (iteration) => {
+      await benchmark("gif export, no overlay, 1 worker", options.gifIterations, async (iteration) => {
         await exportTerminalGif({
           ...baseRenderOptions,
-          output: path.join(outputDir, `plain-${iteration}.gif`),
+          output: path.join(outputDir, `plain-sequential-${iteration}.gif`),
           overlay: false,
-          repeat: -1
+          repeat: -1,
+          workers: 1
         });
       })
     );
     results.push(
-      await benchmark("gif export, annotation overlay", options.gifIterations, async (iteration) => {
+      await benchmark(`gif export, no overlay, ${gifWorkerLabel}`, options.gifIterations, async (iteration) => {
+        await exportTerminalGif({
+          ...baseRenderOptions,
+          output: path.join(outputDir, `plain-parallel-${iteration}.gif`),
+          overlay: false,
+          repeat: -1,
+          workers: options.gifWorkers
+        });
+      })
+    );
+    results.push(
+      await benchmark(`gif export, annotation overlay, ${gifWorkerLabel}`, options.gifIterations, async (iteration) => {
         await exportTerminalGif({
           ...baseRenderOptions,
           output: path.join(outputDir, `overlay-${iteration}.gif`),
           overlay: { position: "bottom-right" },
-          repeat: -1
+          repeat: -1,
+          workers: options.gifWorkers
         });
       })
     );
@@ -175,13 +191,14 @@ async function benchmark(
 }
 
 function printResults(results: BenchmarkResult[]): void {
-  process.stdout.write(`${"benchmark".padEnd(36)} ${"mean".padStart(10)} ${"min".padStart(10)} ${"max".padStart(10)} ${"throughput".padStart(16)}\n`);
-  process.stdout.write(`${"-".repeat(86)}\n`);
+  const labelWidth = Math.max(36, ...results.map((result) => result.label.length));
+  process.stdout.write(`${"benchmark".padEnd(labelWidth)} ${"mean".padStart(10)} ${"min".padStart(10)} ${"max".padStart(10)} ${"throughput".padStart(16)}\n`);
+  process.stdout.write(`${"-".repeat(labelWidth + 50)}\n`);
   for (const result of results) {
     const throughput =
       result.unitCount && result.unitName ? `${formatNumber(result.unitCount / (result.meanMs / 1000))} ${result.unitName}/s` : `${formatNumber(1000 / result.meanMs)} runs/s`;
     process.stdout.write(
-      `${result.label.padEnd(36)} ${formatMs(result.meanMs).padStart(10)} ${formatMs(result.minMs).padStart(10)} ${formatMs(result.maxMs).padStart(10)} ${throughput.padStart(16)}\n`
+      `${result.label.padEnd(labelWidth)} ${formatMs(result.meanMs).padStart(10)} ${formatMs(result.minMs).padStart(10)} ${formatMs(result.maxMs).padStart(10)} ${throughput.padStart(16)}\n`
     );
   }
 }
@@ -205,6 +222,9 @@ function parseArgs(args: string[]): BenchmarkOptions {
         break;
       case "--gif-iterations":
         parsed.gifIterations = parseNonNegativeInteger(requiredValue(args, ++index, arg), arg);
+        break;
+      case "--gif-workers":
+        parsed.gifWorkers = parsePositiveInteger(requiredValue(args, ++index, arg), arg);
         break;
       case "--no-synthetic-annotation":
         parsed.syntheticAnnotation = false;
@@ -251,6 +271,7 @@ function printHelpAndExit(): never {
   process.stdout.write(`  --trace <file>                Trace file to benchmark. Default: examples/simple.tui-trace.json\n`);
   process.stdout.write(`  --iterations <count>          Render benchmark iterations. Default: 25\n`);
   process.stdout.write(`  --gif-iterations <count>      GIF export benchmark iterations; 0 skips GIF export. Default: 5\n`);
+  process.stdout.write(`  --gif-workers <count>         Worker count for parallel GIF export rows. Default: auto.\n`);
   process.stdout.write(`  --no-synthetic-annotation     Do not create a temporary annotation sidecar for overlay benchmarks.\n`);
   process.stdout.write(`  -h, --help                    Show help.\n`);
   process.exit(0);
@@ -262,6 +283,13 @@ function formatMs(value: number): string {
 
 function formatNumber(value: number): string {
   return value >= 100 ? value.toFixed(0) : value.toFixed(1);
+}
+
+function formatWorkerLabel(workers: number | undefined): string {
+  if (workers === undefined) {
+    return "auto workers";
+  }
+  return `${workers} worker${workers === 1 ? "" : "s"}`;
 }
 
 function formatDuration(timeMs: number): string {

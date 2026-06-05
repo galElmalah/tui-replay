@@ -61,6 +61,7 @@ program
   .option("--line-height <px>", "terminal line height before scale", parsePositiveNumber)
   .option("--padding <px>", "terminal padding before scale", parseNonNegativeNumber)
   .option("--font-family <family>", "terminal font family", "Menlo, Monaco, Consolas, monospace")
+  .option("--workers <count>", "parallel frame workers for GIF preparation; 1 disables worker parallelism", parsePositiveInteger)
   .option("--overlay", "draw frame, timestamp, and annotation metadata over the exported terminal GIF")
   .option("--overlay-position <position>", "overlay position: top-left, top-right, bottom-left, or bottom-right", parseOverlayPosition, "bottom-right")
   .option("--overlay-background <color>", "overlay background color", "#05080c")
@@ -81,6 +82,7 @@ program
         lineHeight?: number;
         padding?: number;
         fontFamily: string;
+        workers?: number;
         overlay?: boolean;
         overlayPosition: TerminalOverlayPosition;
         overlayBackground: string;
@@ -102,6 +104,7 @@ program
         lineHeight: options.lineHeight,
         padding: options.padding,
         fontFamily: options.fontFamily,
+        workers: options.workers,
         overlay: options.overlay
           ? {
               position: options.overlayPosition,
@@ -113,7 +116,7 @@ program
 
       process.stdout.write(`Wrote ${result.outputPath}\n`);
       process.stdout.write(
-        `Trace: ${result.tracePath}\nFrames: ${result.frameCount} | Duration: ${formatDuration(result.durationMs)} | Size: ${result.width}x${result.height}\n`
+        `Trace: ${result.tracePath}\nFrames: ${formatFrameCount(result.frameCount, result.encodedFrameCount)} | Duration: ${formatDuration(result.durationMs)} | Size: ${result.width}x${result.height} | Workers: ${result.workers}\n`
       );
     }
   );
@@ -242,6 +245,14 @@ function parseNonNegativeInteger(value: string): number {
   return parsed;
 }
 
+function parsePositiveInteger(value: string): number {
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed <= 0) {
+    throw new Error(`Invalid positive integer: ${value}`);
+  }
+  return parsed;
+}
+
 function parsePositiveNumber(value: string): number {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) {
@@ -285,6 +296,13 @@ function formatDuration(durationMs: number): string {
     return `${durationMs}ms`;
   }
   return `${(durationMs / 1000).toFixed(2)}s`;
+}
+
+function formatFrameCount(frameCount: number, encodedFrameCount: number): string {
+  if (encodedFrameCount === frameCount) {
+    return String(frameCount);
+  }
+  return `${frameCount} (${encodedFrameCount} encoded)`;
 }
 
 function isBunRuntime(): boolean {

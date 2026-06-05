@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { Resvg } from "@resvg/resvg-js";
 import { loadResolvedTraceAnnotations } from "../trace/annotations.js";
@@ -33,6 +34,8 @@ export type TerminalRenderOptions = {
   lineHeight?: number;
   padding?: number;
   fontFamily?: string;
+  fontFiles?: string[];
+  loadSystemFonts?: boolean;
   background?: string;
   foreground?: string;
   cursorColor?: string;
@@ -50,6 +53,8 @@ export type TerminalRenderMetrics = {
   lineHeight: number;
   padding: number;
   fontFamily: string;
+  fontFiles: string[];
+  loadSystemFonts: boolean;
   theme: {
     background: string;
     foreground: string;
@@ -131,7 +136,8 @@ function renderTerminalFrame(frame: RenderedFrame, metrics: TerminalRenderMetric
   const svg = renderTerminalFrameSvg(frame, metrics, annotations);
   return new Resvg(svg, {
     font: {
-      loadSystemFonts: true,
+      loadSystemFonts: metrics.loadSystemFonts,
+      fontFiles: metrics.fontFiles,
       defaultFontFamily: metrics.fontFamily,
       defaultFontSize: metrics.fontSize,
       monospaceFamily: metrics.fontFamily
@@ -326,6 +332,8 @@ function createMetrics(
   const cols = Math.max(...frames.map((frame) => frame.cols));
   const width = Math.ceil(cols * cellWidth + padding * 2);
   const height = Math.ceil(rows * lineHeight + padding * 2);
+  const fontFamily = options.fontFamily ?? DEFAULT_FONT_FAMILY;
+  const fontFiles = options.fontFiles?.map((fontFile) => path.resolve(fontFile)) ?? resolveDefaultFontFiles(fontFamily);
 
   return {
     rows,
@@ -337,7 +345,9 @@ function createMetrics(
     cellWidth,
     lineHeight,
     padding,
-    fontFamily: options.fontFamily ?? DEFAULT_FONT_FAMILY,
+    fontFamily,
+    fontFiles,
+    loadSystemFonts: options.loadSystemFonts ?? (fontFiles.length === 0),
     theme: {
       background: options.background ?? DEFAULT_BACKGROUND,
       foreground: options.foreground ?? DEFAULT_FOREGROUND,
@@ -345,6 +355,67 @@ function createMetrics(
     },
     overlay: resolveOverlay(options.overlay)
   };
+}
+
+const defaultFontFileCache = new Map<string, string[]>();
+
+function resolveDefaultFontFiles(fontFamily: string): string[] {
+  const cached = defaultFontFileCache.get(fontFamily);
+  if (cached) {
+    return cached;
+  }
+
+  const normalized = fontFamily.toLowerCase();
+  const groups = [
+    {
+      names: ["menlo"],
+      paths: ["/System/Library/Fonts/Menlo.ttc", "/Library/Fonts/Menlo.ttc"]
+    },
+    {
+      names: ["monaco"],
+      paths: ["/System/Library/Fonts/Monaco.ttf", "/System/Library/Fonts/Supplemental/Monaco.ttf"]
+    },
+    {
+      names: ["consolas"],
+      paths: ["C:\\Windows\\Fonts\\consola.ttf"]
+    },
+    {
+      names: ["courier", "courier new"],
+      paths: [
+        "/System/Library/Fonts/Courier.ttc",
+        "/System/Library/Fonts/Supplemental/Courier New.ttf",
+        "C:\\Windows\\Fonts\\cour.ttf"
+      ]
+    },
+    {
+      names: ["monospace"],
+      paths: [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+        "/usr/share/fonts/truetype/liberation2/LiberationMono-Regular.ttf",
+        "/usr/share/fonts/opentype/noto/NotoSansMono-Regular.ttf"
+      ]
+    }
+  ];
+
+  for (const group of groups) {
+    if (!group.names.some((name) => normalized.includes(name))) {
+      continue;
+    }
+    const existing = firstExistingPath(group.paths);
+    if (existing) {
+      defaultFontFileCache.set(fontFamily, [existing]);
+      return [existing];
+    }
+  }
+
+  const fallback = firstExistingPath(groups.flatMap((group) => group.paths));
+  const result = fallback ? [fallback] : [];
+  defaultFontFileCache.set(fontFamily, result);
+  return result;
+}
+
+function firstExistingPath(paths: string[]): string | undefined {
+  return paths.find((fontPath) => existsSync(fontPath));
 }
 
 function resolveOverlay(overlay: TerminalRenderOptions["overlay"]): TerminalRenderMetrics["overlay"] {
